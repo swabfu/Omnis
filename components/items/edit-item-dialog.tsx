@@ -22,6 +22,7 @@ type Item = Database['public']['Tables']['items']['Row']
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface EditItemDialogProps {

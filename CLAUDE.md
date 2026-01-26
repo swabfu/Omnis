@@ -30,8 +30,13 @@ Located in `supabase/schema.sql`. Key tables:
 
 - **profiles**: User profiles (linked to auth.users via trigger)
 - **items**: Core content storage with types: `link`, `tweet`, `image`, `note`
-- **tags**: User-defined tags for organization
+- **tags**: User-defined tags for organization. Columns: `id`, `user_id`, `name`, `color` (default '#3b82f6'), `sort_order` (default 0)
 - **item_tags**: Many-to-many junction table
+
+**Important:** When fetching items with tags, always include `color` in the tag query:
+```typescript
+.select('*, tags (id, name, color)')
+```
 
 Items have status workflow: `inbox` → `done` → `archived`. Items also store a 1536-dimensional vector embedding for semantic search (pgvector extension).
 
@@ -83,3 +88,16 @@ Located in `extension/` - Manifest V2 extension for quick content saving. Integr
 Required for Supabase:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Tag System Components
+
+Key tag-related components (all display tag colors):
+
+- **`components/layout/sidebar.tsx`** - Drag-and-drop tag reordering with @dnd-kit, inline edit (name/color), delete confirmation
+- **`components/tags/tag-manager-dialog.tsx`** - Dialog for creating new tags with color picker
+- **`components/items/tag-selector.tsx`** - Tag selector for adding tags to items
+- **`components/items/item-card.tsx`** - Displays tags with colors on items
+
+**Tag event bus:** `dispatchTagsUpdated()` function triggers `omnis:tags-updated` custom event to sync tag changes across components.
+
+**Migrations:** New schema changes require manual migration in Supabase SQL Editor (files in `supabase/migrations/`).

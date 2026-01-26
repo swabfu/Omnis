@@ -12,6 +12,7 @@ type Item = Database['public']['Tables']['items']['Row']
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface ItemWithTags extends Item {
@@ -40,7 +41,8 @@ export function TagFeed({ tagId }: TagFeedProps) {
           *,
           tags (
             id,
-            name
+            name,
+            color
           )
         )
       `)

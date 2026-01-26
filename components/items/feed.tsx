@@ -13,6 +13,7 @@ type Item = Database['public']['Tables']['items']['Row']
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface ItemWithTags extends Item {
@@ -48,7 +49,8 @@ export function Feed({ initialType, initialStatus, searchResults }: FeedProps) {
         *,
         tags (
           id,
-          name
+          name,
+          color
         )
       `)
       .order('created_at', { ascending: false })

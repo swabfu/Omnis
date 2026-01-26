@@ -23,6 +23,7 @@ import { TagSelector } from './tag-selector'
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface AddItemDialogProps {

@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { X, Plus } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { X, Plus, Palette } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
 
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface TagSelectorProps {
@@ -20,11 +22,21 @@ interface TagSelectorProps {
   onTagCreated?: () => void
 }
 
+// Preset colors for tag selection
+const PRESET_COLORS = [
+  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+  '#ec4899', '#f43f5e',
+]
+
 export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }: TagSelectorProps) {
   const { user } = useAuth()
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [newTagName, setNewTagName] = useState('')
+  const [selectedColor, setSelectedColor] = useState('#3b82f6')
   const [showInput, setShowInput] = useState(false)
+  const [showColorPicker, setShowColorPicker] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -40,6 +52,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
       .from('tags')
       .select('*')
       .eq('user_id', user.id)
+      .order('sort_order', { ascending: true })
 
     if (data) {
       setAllTags(data)
@@ -61,10 +74,26 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
         console.log('Added existing tag:', existingTag)
       }
     } else {
-      // Create new tag
+      // Get the current max sort_order for this user
+      const { data: maxOrder } = await supabase
+        .from('tags')
+        .select('sort_order')
+        .eq('user_id', user.id)
+        .order('sort_order', { ascending: false })
+        .limit(1)
+        .single()
+
+      const nextSortOrder = (maxOrder?.sort_order ?? -1) + 1
+
+      // Create new tag with selected color and sort_order
       const { data: newTag, error: insertError } = await supabase
         .from('tags')
-        .insert({ name: newTagName.trim(), user_id: user.id })
+        .insert({
+          name: newTagName.trim(),
+          user_id: user.id,
+          color: selectedColor,
+          sort_order: nextSortOrder,
+        })
         .select()
         .single()
 
@@ -83,6 +112,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
     }
 
     setNewTagName('')
+    setSelectedColor('#3b82f6')
     setShowInput(false)
   }
 
@@ -108,7 +138,16 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedTags.map(tag => (
-            <Badge key={tag.id} variant="secondary" className="gap-1 pl-2">
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="gap-1 pl-2"
+              style={{
+                backgroundColor: `${tag.color || '#3b82f6'}20`,
+                borderColor: `${tag.color || '#3b82f6'}40`,
+                color: tag.color || '#3b82f6',
+              }}
+            >
               {tag.name}
               <button
                 onClick={() => handleRemoveTag(tag.id)}
@@ -123,22 +162,84 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
 
       {/* Add Tag */}
       {showInput ? (
-        <div className="flex gap-2">
-          <Input
-            placeholder="Tag name..."
-            value={newTagName}
-            onChange={(e) => setNewTagName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleCreateTag()
-              } else if (e.key === 'Escape') {
-                setShowInput(false)
-                setNewTagName('')
-              }
-            }}
-            autoFocus
-          />
+        <div className="flex gap-2 items-start">
+          <div className="flex-1 space-y-2">
+            <Input
+              placeholder="Tag name..."
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleCreateTag()
+                } else if (e.key === 'Escape') {
+                  setShowInput(false)
+                  setNewTagName('')
+                }
+              }}
+              autoFocus
+            />
+            {/* Color preview and picker */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Color:</span>
+              <Popover open={showColorPicker} onOpenChange={setShowColorPicker}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                    style={{ backgroundColor: selectedColor, borderColor: selectedColor }}
+                  />
+                </PopoverTrigger>
+                <PopoverContent side="top" align="start" className="w-56 p-3">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium">Pick a color</p>
+                    <div className="grid grid-cols-9 gap-1.5">
+                      {PRESET_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => {
+                            setSelectedColor(color)
+                            setShowColorPicker(false)
+                          }}
+                          className="h-5 w-5 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          style={{
+                            backgroundColor: color,
+                            borderColor: selectedColor === color ? 'hsl(var(--background))' : 'transparent',
+                            boxShadow: selectedColor === color ? `0 0 0 1px ${color}` : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 pt-1 border-t">
+                      <input
+                        type="color"
+                        value={selectedColor}
+                        onChange={(e) => setSelectedColor(e.target.value)}
+                        className="h-6 w-8 cursor-pointer rounded border"
+                      />
+                      <Input
+                        type="text"
+                        value={selectedColor}
+                        onChange={(e) => setSelectedColor(e.target.value)}
+                        className="h-7 flex-1 text-xs font-mono"
+                        placeholder="#3b82f6"
+                      />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <span
+                className="text-xs px-2 py-0.5 rounded"
+                style={{
+                  backgroundColor: `${selectedColor}20`,
+                  color: selectedColor,
+                }}
+              >
+                {newTagName || 'Preview'}
+              </span>
+            </div>
+          </div>
           <Button size="sm" onClick={handleCreateTag}>
             Add
           </Button>
@@ -150,6 +251,10 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
               key={tag.id}
               variant="outline"
               className="cursor-pointer hover:bg-accent"
+              style={{
+                borderColor: `${tag.color || '#3b82f6'}60`,
+                color: tag.color || '#3b82f6',
+              }}
               onClick={() => handleToggleTag(tag)}
             >
               + {tag.name}

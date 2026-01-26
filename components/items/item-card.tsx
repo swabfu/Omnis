@@ -33,6 +33,7 @@ type Item = Database['public']['Tables']['items']['Row']
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface ItemWithTags extends Item {
@@ -195,7 +196,16 @@ export function ItemCard({
                 {status}
               </Badge>
               {tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="text-xs">
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="text-xs"
+                  style={{
+                    backgroundColor: `${tag.color || '#3b82f6'}20`,
+                    borderColor: `${tag.color || '#3b82f6'}40`,
+                    color: tag.color || '#3b82f6',
+                  }}
+                >
                   {tag.name}
                 </Badge>
               ))}

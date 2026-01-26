@@ -11,11 +11,11 @@ Prioritized backlog of improvements, bugs, and features.
 - [x] **Search doesn't work** - Search functionality is non-functional
 - [x] **Cannot edit entries** - No way to add tags or edit existing items after saving
 - [x] **Cannot tag entries before auto-save** - Some items automatically save before user can add tags
-- [ ] **Tag management** - Create, edit, delete tags from sidebar
-  - Replace "tag counter" in sidebar with a plus button that opens a dialog
-  - Tag creation dialog includes: name input, color picker
-  - Ability to delete tags from the sidebar (add a small X on each tag which brings up a dialog - deleting tags shouldn't delete the items, just the tag)
-  - Drag and drop to reorder tags in sidebar
+- [x] **Tag management** - Create, edit, delete tags from sidebar
+  - [x] Replace "tag counter" in sidebar with a plus button that opens a dialog
+  - [x] Tag creation dialog includes: name input, color picker
+  - [x] Ability to delete tags from the sidebar (add a small X on each tag which brings up a dialog - deleting tags doesn't delete the items, just the tag)
+  - [x] Drag and drop to reorder tags in sidebar
 - [ ] **Top-right buttons broken** - View toggle buttons in top right don't do anything
 
 ---
@@ -53,7 +53,6 @@ Prioritized backlog of improvements, bugs, and features.
 
 - [ ] **Expand long entries** - When content is too long, expand it and show details in right sidebar instead of having a very long item
 - [ ] **Image captions** - Add ability to add captions to images
-- [ ] **Tag colors** - Color picker in tag creation dialog (see "Tag management" in Critical Bugs); colors display on tag badges throughout app
 - [ ] **Drag and drop** - For images, links, and other content types
 - [ ] **Timestamp toggle** - Switch between "about x time ago" and exact timestamp display
 - [ ] **Timestamp hover tooltip** - Show alternate timestamp format on hover

@@ -11,6 +11,7 @@ type Item = Database['public']['Tables']['items']['Row']
 interface Tag {
   id: string
   name: string
+  color?: string
 }
 
 interface ItemWithTags extends Item {
@@ -36,7 +37,8 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
             *,
             tags (
               id,
-              name
+              name,
+              color
             )
           `)
           .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%,url.ilike.%${query}%`)
@@ -61,7 +63,8 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
         *,
         tags (
           id,
-          name
+          name,
+          color
         )
       `)
       .order('created_at', { ascending: false })
