@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import headers from 'next/headers'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 
@@ -10,18 +11,19 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      const forwardedHost = request.headers.get('x-forwarded-host')
-      const isLocalEnv = process.env.NODE_ENV === 'development'
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
-      }
+      // Get the correct URL for redirect
+      const headersList = await headers()
+      const host = headersList.get('host') || headersList.get('x-forwarded-host')
+      const protocol = headersList.get('x-forwarded-proto') || 'https'
+
+      // Build the URL from the actual host
+      const baseUrl = `${protocol}://${host}`
+
+      return NextResponse.redirect(`${baseUrl}${next}`)
     }
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+  const { origin } = new URL(request.url)
+  return NextResponse.redirect(`${origin}/login?error=auth_code_error`)
 }
