@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
+  const type = searchParams.get('type')
   const next = searchParams.get('next') ?? '/'
 
   if (code) {
@@ -19,11 +20,16 @@ export async function GET(request: Request) {
       // Build the URL from the actual host
       const baseUrl = `${protocol}://${host}`
 
+      // If this is a password reset flow, redirect to update-password
+      if (type === 'recovery') {
+        return NextResponse.redirect(`${baseUrl}/update-password`)
+      }
+
       return NextResponse.redirect(`${baseUrl}${next}`)
     }
   }
 
   // Return the user to an error page with instructions
   const { origin } = new URL(request.url)
-  return NextResponse.redirect(`${origin}/login?error=auth_code_error`)
+  return NextResponse.redirect(`${origin}/login?error=auth_failed`)
 }

@@ -14,7 +14,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [debugInfo, setDebugInfo] = useState('')
+  const [success, setSuccess] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -32,7 +32,6 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setDebugInfo('')
 
     // Validate password
     const validation = validatePassword(password)
@@ -49,46 +48,56 @@ export default function SignupPage() {
       return
     }
 
-    try {
-      setDebugInfo('Calling signUp...')
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: undefined,
-        },
-      })
+    console.log('Attempting signup with:', email)
 
-      if (error) {
-        setDebugInfo(`Error: ${error.message}`)
-        setError(error.message)
-      } else {
-        setDebugInfo(`Success! User: ${data.user?.id}, Session: ${data.session ? 'yes' : 'no'}`)
-
-        // If user was created but no session (email confirmation required), still show success
-        if (data.user) {
-          // Auto sign in since we disabled email confirmation
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          })
-
-          if (signInError) {
-            // If auto sign in fails, still go to login - user can sign in manually
-            router.push('/login?signup=success')
-          } else {
-            router.push('/')
-          }
-        } else {
-          setError('Failed to create account. Please try again.')
-        }
-      }
-    } catch (err) {
-      setDebugInfo(`Exception: ${err}`)
-      setError('An unexpected error occurred')
-    }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    })
 
     setLoading(false)
+
+    if (error) {
+      console.error('Signup error:', error)
+      setError(error.message)
+    } else {
+      console.log('Signup success:', data)
+
+      // Account created! Now sign them in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        // Auto-signin failed, but account was created
+        setSuccess(true)
+        setTimeout(() => {
+          router.push('/login')
+        }, 2000)
+      } else {
+        // Successfully signed in
+        router.push('/')
+      }
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-8">
+              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Account created!</h2>
+              <p className="text-center text-muted-foreground">
+                Redirecting you to login...
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -124,7 +133,7 @@ export default function SignupPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="•••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -142,7 +151,7 @@ export default function SignupPage() {
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder="•••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -152,13 +161,8 @@ export default function SignupPage() {
             </div>
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
-                {error}
-              </div>
-            )}
-            {debugInfo && (
-              <div className="p-2 bg-muted rounded text-xs text-muted-foreground">
-                {debugInfo}
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>

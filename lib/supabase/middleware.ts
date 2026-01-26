@@ -2,6 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { Database } from '@/types/database'
 
+// Public routes that don't require authentication
+const publicRoutes = ['/login', '/signup', '/reset-password', '/update-password', '/auth/callback']
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -25,23 +28,24 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user && !request.nextUrl.pathname.startsWith('/login')) {
-    // Redirect to login if not authenticated
+  const pathname = request.nextUrl.pathname
+
+  // Allow public routes without authentication
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+
+  if (!user && !isPublicRoute) {
+    // Redirect to login if not authenticated and not on public route
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && request.nextUrl.pathname === '/login') {
-    // Redirect to home if already authenticated
+  if (user && pathname === '/login') {
+    // Redirect to home if already authenticated and trying to access login
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
