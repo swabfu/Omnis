@@ -1,56 +1,65 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, CheckCircle } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showSuccess, setShowSuccess] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (searchParams.get('signup') === 'success') {
-      setShowSuccess(true)
-      setTimeout(() => setShowSuccess(false), 5000)
+  const validatePassword = (pwd: string): { valid: boolean; message?: string } => {
+    if (pwd.length < 8) {
+      return { valid: false, message: 'Password must be at least 8 characters' }
     }
-  }, [searchParams])
-
-  const validatePassword = (pwd: string): boolean => {
-    if (pwd.length < 8) return false
-    if (!/\d/.test(pwd)) return false // Must contain a number
-    return true
+    if (!/\d/.test(pwd)) {
+      return { valid: false, message: 'Password must contain at least one number' }
+    }
+    return { valid: true }
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    if (!password) {
-      setError('Please enter your password')
+    // Validate password
+    const validation = validatePassword(password)
+    if (!validation.valid) {
+      setError(validation.message || 'Invalid password')
       setLoading(false)
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    // Check passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
 
     if (error) {
       setError(error.message)
     } else {
-      router.push('/')
+      // Redirect to login page with success message
+      router.push('/login?signup=success')
     }
     setLoading(false)
   }
@@ -59,19 +68,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Welcome to Omnis</CardTitle>
+          <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Your second brain for links, tweets, notes, and more.
+            Start building your second brain today.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showSuccess && (
-            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle className="h-4 w-4" />
-              Account created! Please sign in below.
-            </div>
-          )}
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -99,7 +102,25 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                autoComplete="current-password"
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-muted-foreground">
+                Must be at least 8 characters and include a number
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm Password
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+                autoComplete="new-password"
               />
             </div>
             {error && (
@@ -107,17 +128,12 @@ export default function LoginPage() {
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Sign In
+              Create Account
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            <a href="/signup" className="text-primary hover:underline">
-              Don&apos;t have an account? Sign up
-            </a>
-          </div>
-          <div className="mt-2 text-center text-sm">
-            <a href="/reset-password" className="text-muted-foreground hover:underline">
-              Forgot your password?
+            <a href="/login" className="text-primary hover:underline">
+              Already have an account? Sign in
             </a>
           </div>
         </CardContent>
