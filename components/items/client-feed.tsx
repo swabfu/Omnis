@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { Feed } from './feed'
 import { AddItemDialog } from './add-item-dialog'
 import { ContentType, ItemStatus } from '@/types/database'
+import type { ItemWithTags } from './feed'
 
 interface ClientFeedProps {
   initialType?: ContentType
   initialStatus?: ItemStatus
+  searchResults?: ItemWithTags[] | null
 }
 
-export function ClientFeed({ initialType, initialStatus }: ClientFeedProps) {
+export function ClientFeed({ initialType, initialStatus, searchResults }: ClientFeedProps) {
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleItemAdded = () => {
@@ -30,7 +32,7 @@ export function ClientFeed({ initialType, initialStatus }: ClientFeedProps) {
         </div>
         <AddItemDialog onItemAdded={handleItemAdded} />
       </div>
-      <Feed key={refreshKey} initialType={initialType} initialStatus={initialStatus} />
+      <Feed key={refreshKey} initialType={initialType} initialStatus={initialStatus} searchResults={searchResults} />
     </>
   )
 }

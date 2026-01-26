@@ -17,9 +17,10 @@ interface TagSelectorProps {
   selectedTags: Tag[]
   onTagsChange: (tags: Tag[]) => void
   itemId?: string
+  onTagCreated?: () => void
 }
 
-export function TagSelector({ selectedTags, onTagsChange, itemId }: TagSelectorProps) {
+export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }: TagSelectorProps) {
   const { user } = useAuth()
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [newTagName, setNewTagName] = useState('')
@@ -57,18 +58,27 @@ export function TagSelector({ selectedTags, onTagsChange, itemId }: TagSelectorP
       // Add existing tag if not already selected
       if (!selectedTags.find(t => t.id === existingTag.id)) {
         onTagsChange([...selectedTags, existingTag])
+        console.log('Added existing tag:', existingTag)
       }
     } else {
       // Create new tag
-      const { data: newTag } = await supabase
+      const { data: newTag, error: insertError } = await supabase
         .from('tags')
         .insert({ name: newTagName.trim(), user_id: user.id })
         .select()
         .single()
 
+      if (insertError) {
+        console.error('Error creating tag:', insertError)
+        alert('Failed to create tag. Please try again.')
+        return
+      }
+
       if (newTag) {
         setAllTags([...allTags, newTag])
         onTagsChange([...selectedTags, newTag])
+        onTagCreated?.()
+        console.log('Created and added new tag:', newTag)
       }
     }
 

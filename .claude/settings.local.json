@@ -4,7 +4,8 @@
       "Bash(npx create-next-app:*)",
       "Bash(npm install @supabase/supabase-js @supabase/ssr lucide-react react-tweet date-fns next-themes)",
       "Bash(npx:*)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(npm run lint)"
     ]
   }
 }

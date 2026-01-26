@@ -82,6 +82,11 @@ export function TagFeed({ tagId }: TagFeedProps) {
     }
   }
 
+  const handleItemUpdated = async () => {
+    // Re-fetch items to get the updated data
+    await fetchItemsByTag()
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -107,6 +112,7 @@ export function TagFeed({ tagId }: TagFeedProps) {
             tags={item.tags || []}
             onDelete={handleDelete}
             onStatusChange={handleStatusChange}
+            onItemUpdated={handleItemUpdated}
           />
         </MasonryItem>
       ))}

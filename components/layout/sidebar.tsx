@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -25,6 +25,14 @@ import { Database } from '@/types/database'
 
 type Tag = Database['public']['Tables']['tags']['Row']
 
+// Event name for tag updates across components
+export const TAGS_UPDATED_EVENT = 'omnis:tags-updated'
+
+// Helper function to dispatch tag update event
+export function dispatchTagsUpdated() {
+  window.dispatchEvent(new CustomEvent(TAGS_UPDATED_EVENT))
+}
+
 const navItems = [
   { name: 'All Items', href: '/', icon: Inbox },
   { name: 'Links', href: '/type/link', icon: Link2 },
@@ -44,11 +52,7 @@ export function Sidebar() {
   const [tags, setTags] = useState<Tag[]>([])
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchTags()
-  }, [])
-
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     const { data } = await supabase
       .from('tags')
       .select('*')
@@ -57,7 +61,21 @@ export function Sidebar() {
     if (data) {
       setTags(data)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchTags()
+
+    // Listen for tag updates from other components (dialogs, etc.)
+    const handleTagsUpdated = () => {
+      fetchTags()
+    }
+
+    window.addEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    return () => {
+      window.removeEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    }
+  }, [fetchTags])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -75,7 +93,7 @@ export function Sidebar() {
 
       <ScrollArea className="flex-1 px-3 py-4">
         {/* Add Button */}
-        <AddItemDialog />
+        <AddItemDialog onTagCreated={dispatchTagsUpdated} />
 
         <Separator className="my-4" />
 

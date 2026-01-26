@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,11 +20,24 @@ import {
   Check,
   Archive,
   Trash2,
+  FileEdit,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { ContentType, ItemStatus } from '@/types/database'
+import { ContentType, ItemStatus, Database } from '@/types/database'
 import { Tweet } from 'react-tweet'
 import { createClient } from '@/lib/supabase/client'
+import { EditItemDialog } from './edit-item-dialog'
+
+type Item = Database['public']['Tables']['items']['Row']
+
+interface Tag {
+  id: string
+  name: string
+}
+
+interface ItemWithTags extends Item {
+  tags: Tag[]
+}
 
 interface ItemCardProps {
   id: string
@@ -35,9 +49,10 @@ interface ItemCardProps {
   image_path: string | null
   status: ItemStatus
   created_at: string
-  tags?: { id: string; name: string }[]
+  tags?: Tag[]
   onDelete?: (id: string) => void
   onStatusChange?: (id: string, status: ItemStatus) => void
+  onItemUpdated?: () => void
 }
 
 const typeIcons = {
@@ -73,9 +88,27 @@ export function ItemCard({
   tags = [],
   onDelete,
   onStatusChange,
+  onItemUpdated,
 }: ItemCardProps) {
   const Icon = typeIcons[type]
   const supabase = createClient()
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
+  // Build item object for edit dialog
+  const item: ItemWithTags = {
+    id,
+    type,
+    url,
+    title,
+    description,
+    content,
+    image_path,
+    status,
+    created_at,
+    tags: tags || [],
+    user_id: '',
+    embedding: null,
+  }
 
   const handleStatusChange = (newStatus: ItemStatus) => {
     onStatusChange?.(id, newStatus)
@@ -149,85 +182,98 @@ export function ItemCard({
   }
 
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-md">
-      <CardContent className="p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-md ${typeColors[type].split(' ')[0]}`}>
-              <Icon className="h-3.5 w-3.5" />
-            </div>
-            <Badge variant="outline" className={statusColors[status]}>
-              {status}
-            </Badge>
-            {tags.map((tag) => (
-              <Badge key={tag.id} variant="secondary" className="text-xs">
-                {tag.name}
+    <>
+      <Card className="group overflow-hidden transition-all hover:shadow-md">
+        <CardContent className="p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`p-1.5 rounded-md ${typeColors[type].split(' ')[0]}`}>
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <Badge variant="outline" className={statusColors[status]}>
+                {status}
               </Badge>
-            ))}
+              {tags.map((tag) => (
+                <Badge key={tag.id} variant="secondary" className="text-xs">
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                  <FileEdit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                {status !== 'done' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('done')}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Mark as Done
+                  </DropdownMenuItem>
+                )}
+                {status !== 'inbox' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Move to Inbox
+                  </DropdownMenuItem>
+                )}
+                {status !== 'archived' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
+                    <Archive className="mr-2 h-4 w-4" />
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {status !== 'done' && (
-                <DropdownMenuItem onClick={() => handleStatusChange('done')}>
-                  <Check className="mr-2 h-4 w-4" />
-                  Mark as Done
-                </DropdownMenuItem>
+          {/* Title */}
+          {title && type !== 'tweet' && (
+            <h3 className="font-semibold mb-2 line-clamp-2">
+              {type === 'link' && url ? (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  {title}
+                </a>
+              ) : (
+                title
               )}
-              {status !== 'inbox' && (
-                <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
-                  <Check className="mr-2 h-4 w-4" />
-                  Move to Inbox
-                </DropdownMenuItem>
-              )}
-              {status !== 'archived' && (
-                <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
-                  <Archive className="mr-2 h-4 w-4" />
-                  Archive
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            </h3>
+          )}
 
-        {/* Title */}
-        {title && type !== 'tweet' && (
-          <h3 className="font-semibold mb-2 line-clamp-2">
-            {type === 'link' && url ? (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors"
-              >
-                {title}
-              </a>
-            ) : (
-              title
-            )}
-          </h3>
-        )}
+          {/* Content */}
+          {renderContent()}
 
-        {/* Content */}
-        {renderContent()}
+          {/* Footer */}
+          <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
+            <time dateTime={created_at}>
+              {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
+            </time>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Footer */}
-        <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
-          <time dateTime={created_at}>
-            {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
-          </time>
-        </div>
-      </CardContent>
-    </Card>
+      <EditItemDialog
+        item={item}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onItemUpdated={onItemUpdated || (() => {})}
+      />
+    </>
   )
 }

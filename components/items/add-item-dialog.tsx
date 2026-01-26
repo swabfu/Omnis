@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,18 +27,21 @@ interface Tag {
 
 interface AddItemDialogProps {
   onItemAdded?: () => void
+  onTagCreated?: () => void
 }
 
-export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
+export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps) {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(false)
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+  const [metadataFetched, setMetadataFetched] = useState(false)
   const supabase = createClient()
 
   const resetForm = () => {
@@ -48,6 +51,37 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
     setContent('')
     setImageFile(null)
     setSelectedTags([])
+    setMetadataFetched(false)
+  }
+
+  // Auto-fetch metadata when URL is entered
+  useEffect(() => {
+    const debounceTimer = setTimeout(async () => {
+      if (url && !metadataFetched && isValidUrl(url)) {
+        setFetching(true)
+        try {
+          const metadata = await fetchMetadata(url)
+          setTitle(metadata.title || '')
+          setDescription(metadata.description || '')
+          setMetadataFetched(true)
+        } catch (error) {
+          // Silently fail - user can manually enter title/description
+        } finally {
+          setFetching(false)
+        }
+      }
+    }, 500)
+
+    return () => clearTimeout(debounceTimer)
+  }, [url, metadataFetched])
+
+  const isValidUrl = (string: string) => {
+    try {
+      new URL(string)
+      return true
+    } catch {
+      return false
+    }
   }
 
   const handleUrlSubmit = async (e: React.FormEvent) => {
@@ -57,10 +91,9 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
     setLoading(true)
 
     try {
-      // Auto-fetch metadata
-      const metadata = await fetchMetadata(url)
-      const finalTitle = title || metadata.title || url
-      const finalDescription = description || metadata.description || ''
+      // Use current title/description (either from metadata fetch or manual entry)
+      const finalTitle = title || url
+      const finalDescription = description || ''
 
       // Determine type
       let type: ContentType = 'link'
@@ -215,9 +248,21 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
                 <Input
                   placeholder="https://example.com"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={loading}
+                  onChange={(e) => {
+                    setUrl(e.target.value)
+                    setMetadataFetched(false) // Re-fetch if URL changes
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent Enter from submitting - user must click Save
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                    }
+                  }}
+                  disabled={loading || fetching}
                 />
+                {fetching && (
+                  <p className="text-xs text-muted-foreground">Fetching preview...</p>
+                )}
               </div>
               {url && (
                 <>
@@ -247,6 +292,7 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
                 <TagSelector
                   selectedTags={selectedTags}
                   onTagsChange={setSelectedTags}
+                  onTagCreated={onTagCreated}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !url}>
@@ -279,6 +325,7 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
                 <TagSelector
                   selectedTags={selectedTags}
                   onTagsChange={setSelectedTags}
+                  onTagCreated={onTagCreated}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !imageFile}>
@@ -306,6 +353,7 @@ export function AddItemDialog({ onItemAdded }: AddItemDialogProps) {
                 <TagSelector
                   selectedTags={selectedTags}
                   onTagsChange={setSelectedTags}
+                  onTagCreated={onTagCreated}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !content.trim()}>

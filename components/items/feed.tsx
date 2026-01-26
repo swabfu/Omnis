@@ -19,18 +19,28 @@ interface ItemWithTags extends Item {
   tags: Tag[]
 }
 
+export type { ItemWithTags }
+
 interface FeedProps {
   initialType?: ContentType
   initialStatus?: ItemStatus
+  searchResults?: ItemWithTags[] | null
 }
 
-export function Feed({ initialType, initialStatus }: FeedProps) {
+export function Feed({ initialType, initialStatus, searchResults }: FeedProps) {
   const [items, setItems] = useState<ItemWithTags[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'masonry' | 'uniform'>('masonry')
   const supabase = createClient()
 
   const fetchItems = async () => {
+    // If search results are provided, use those
+    if (searchResults !== null && searchResults !== undefined) {
+      setItems(searchResults)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     let query = supabase
       .from('items')
@@ -62,7 +72,7 @@ export function Feed({ initialType, initialStatus }: FeedProps) {
 
   useEffect(() => {
     fetchItems()
-  }, [initialType, initialStatus])
+  }, [initialType, initialStatus, searchResults])
 
   const handleStatusChange = async (id: string, status: ItemStatus) => {
     const { error } = await supabase
@@ -86,6 +96,11 @@ export function Feed({ initialType, initialStatus }: FeedProps) {
     if (!error) {
       setItems(items.filter(item => item.id !== id))
     }
+  }
+
+  const handleItemUpdated = async () => {
+    // Re-fetch items to get the updated data
+    await fetchItems()
   }
 
   if (loading) {
@@ -122,6 +137,7 @@ export function Feed({ initialType, initialStatus }: FeedProps) {
             tags={item.tags || []}
             onDelete={handleDelete}
             onStatusChange={handleStatusChange}
+            onItemUpdated={handleItemUpdated}
           />
         </ItemWrapper>
       ))}
