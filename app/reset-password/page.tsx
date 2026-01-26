@@ -5,29 +5,40 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, CheckCircle } from 'lucide-react'
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [debugInfo, setDebugInfo] = useState('')
   const supabase = createClient()
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setDebugInfo('')
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    })
+    try {
+      setDebugInfo('Sending reset email...')
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccess(true)
+      if (error) {
+        setDebugInfo(`Error: ${error.message}`)
+        setError(error.message)
+      } else {
+        setDebugInfo(`Success! Data: ${JSON.stringify(data)}`)
+        setSuccess(true)
+      }
+    } catch (err) {
+      setDebugInfo(`Exception: ${err}`)
+      setError('An unexpected error occurred')
     }
+
     setLoading(false)
   }
 
@@ -86,7 +97,15 @@ export default function ResetPasswordPage() {
               />
             </div>
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+            {debugInfo && (
+              <div className="p-2 bg-muted rounded text-xs text-muted-foreground">
+                {debugInfo}
+              </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
