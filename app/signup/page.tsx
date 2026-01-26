@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function SignupPage() {
@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [debugInfo, setDebugInfo] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -31,6 +32,7 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setDebugInfo('')
 
     // Validate password
     const validation = validatePassword(password)
@@ -47,20 +49,45 @@ export default function SignupPage() {
       return
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      setDebugInfo('Calling signUp...')
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: undefined,
+        },
+      })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      // Redirect to login page with success message
-      router.push('/login?signup=success')
+      if (error) {
+        setDebugInfo(`Error: ${error.message}`)
+        setError(error.message)
+      } else {
+        setDebugInfo(`Success! User: ${data.user?.id}, Session: ${data.session ? 'yes' : 'no'}`)
+
+        // If user was created but no session (email confirmation required), still show success
+        if (data.user) {
+          // Auto sign in since we disabled email confirmation
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+          if (signInError) {
+            // If auto sign in fails, still go to login - user can sign in manually
+            router.push('/login?signup=success')
+          } else {
+            router.push('/')
+          }
+        } else {
+          setError('Failed to create account. Please try again.')
+        }
+      }
+    } catch (err) {
+      setDebugInfo(`Exception: ${err}`)
+      setError('An unexpected error occurred')
     }
+
     setLoading(false)
   }
 
@@ -124,7 +151,15 @@ export default function SignupPage() {
               />
             </div>
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+            {debugInfo && (
+              <div className="p-2 bg-muted rounded text-xs text-muted-foreground">
+                {debugInfo}
+              </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
