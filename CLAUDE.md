@@ -101,3 +101,93 @@ Key tag-related components (all display tag colors):
 **Tag event bus:** `dispatchTagsUpdated()` function triggers `omnis:tags-updated` custom event to sync tag changes across components.
 
 **Migrations:** New schema changes require manual migration in Supabase SQL Editor (files in `supabase/migrations/`).
+
+## Type Icons & Colors
+
+Centralized type icons and colors for consistent styling across the app:
+
+**File:** `lib/type-icons.tsx`
+
+**Global icon sizing constants (use these, never hardcode):**
+- `NAV_ICON_SIZE = 'h-5 w-5'` / `NAV_ICON_STROKE_WIDTH = 2.5` - Sidebar navigation icons
+- `ACTION_ICON_SIZE = 'h-3 w-3'` / `ACTION_ICON_STROKE_WIDTH = 2.5` - Edit/delete/plus buttons
+- `BADGE_ICON_SIZE = 'h-4 w-4'` / `BADGE_ICON_STROKE_WIDTH = 2.5` - Tag badges on items
+- `OVERLAY_ICON_SIZE = 'h-2.5 w-2.5'` / `OVERLAY_ICON_STROKE_WIDTH = 3` - Overlay icons
+- `SMALL_ICON_SIZE = 'h-3 w-3'` - Small inline icons (external links, etc.)
+
+**Icons:**
+- `all`: Inbox icon (All Items)
+- `link`: Link2 icon
+- `tweet`: Twitter icon (bird logo)
+- `image`: ImageIcon
+- `note`: FileText icon
+
+**Colors (no background, text only):**
+- `all`: Neutral (gray)
+- `link`: Green
+- `tweet`: Sky blue
+- `image`: Red
+- `note`: Yellow
+
+**Usage:**
+```typescript
+import { typeIcons, typeColors, allItemsIcon, NAV_ICON_SIZE, NAV_ICON_STROKE_WIDTH } from '@/lib/type-icons'
+
+const Icon = typeIcons.link
+const colorClass = typeColors.link
+
+// In nav items:
+<span className="flex items-center justify-center">
+  <Icon className={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+</span>
+```
+
+## Status Icons & Colors
+
+Centralized status icons and colors:
+
+**File:** `lib/status-icons.tsx`
+
+**Icons:** `Inbox`, `CheckCircle` (done), `Archive` (archived)
+
+**Colors:**
+- `inbox`: Neutral/black
+- `done`: Green
+- `archived`: Orange
+
+**Two color variants:**
+- `statusColors` - For navigation (text only, no background)
+- `statusBadgeColors` - For item badges (with semi-transparent background)
+
+**Usage:**
+```typescript
+import { StatusIcon } from '@/components/items/status-icon'
+import { statusColors, statusBadgeColors } from '@/lib/status-icons'
+
+// In item cards:
+<StatusIcon status="inbox" />
+
+// In sidebar nav:
+import { statusColors } from '@/lib/status-icons'
+const color = statusColors.inbox
+```
+
+## View System
+
+**File:** `components/items/view-toggle.tsx`
+
+Three view modes for item feed:
+- `masonry` - Masonry grid (default, Pinterest-style)
+- `uniform` - Uniform grid columns
+- `list` - Compact list view
+
+**Components:**
+- `components/items/view-toggle.tsx` - Toggle buttons in header
+- `components/items/list-view.tsx` - List view container
+- `components/items/item-card.tsx` - Supports `variant` prop ('card' | 'list')
+
+**Usage:** View state managed in `components/home-client.tsx`, passed to `ClientFeed` and `Header`. Transitions use fade/scale animation (250ms ease-in-out).
+
+```typescript
+type ViewMode = 'masonry' | 'uniform' | 'list'
+```

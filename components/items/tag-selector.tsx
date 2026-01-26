@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { X, Plus, Palette } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
+import { ACTION_ICON_SIZE, ACTION_ICON_STROKE_WIDTH } from '@/lib/type-icons'
 
 interface Tag {
   id: string
@@ -153,7 +154,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                 onClick={() => handleRemoveTag(tag.id)}
                 className="rounded-full hover:bg-muted-foreground/20 p-0.5"
               >
-                <X className="h-3 w-3" />
+                <X className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
               </button>
             </Badge>
           ))}
@@ -266,7 +267,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
             className="h-6 px-2 text-xs"
             onClick={() => setShowInput(true)}
           >
-            <Plus className="h-3 w-3 mr-1" />
+            <Plus className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} mr-1 />
             New Tag
           </Button>
         </div>

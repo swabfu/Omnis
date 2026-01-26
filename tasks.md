@@ -16,7 +16,10 @@ Prioritized backlog of improvements, bugs, and features.
   - [x] Tag creation dialog includes: name input, color picker
   - [x] Ability to delete tags from the sidebar (add a small X on each tag which brings up a dialog - deleting tags doesn't delete the items, just the tag)
   - [x] Drag and drop to reorder tags in sidebar
-- [ ] **Top-right buttons broken** - View toggle buttons in top right don't do anything
+- [x] **Top-right buttons broken** - View toggle buttons in top right don't do anything
+  - [x] Added masonry/uniform/list view modes
+  - [x] Smooth transitions between views (fade/scale animation)
+  - [x] List view shows compact horizontal rows
 
 ---
 
@@ -64,6 +67,12 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Refactoring, cleanup, and quality assurance*
 
+- [x] **Global icon/color framework** - Centralized all icon sizes, colors, and styling constants
+  - [x] Created `lib/type-icons.tsx` with NAV/ACTION/BADGE/OVERLAY icon constants
+  - [x] Created `lib/status-icons.tsx` with global status colors
+  - [x] Type colors: green (links), sky blue (tweets), red (images), yellow (notes), neutral (all)
+  - [x] Status colors: neutral (inbox), green (done), orange (archived)
+  - [x] All icons maintain colors on active nav state
 - [ ] **Code review & simplification** - Debug, test, verify, and simplify codebase before delivery. ENSURE EDGE CASES ARE HANDLED ALWAYS
 - [ ] **Mobile touch targets** - Ensure all buttons are at least 44x44px on mobile
 - [ ] **Input font-size fix** - Set minimum 16px on mobile inputs to prevent iOS auto-zoom

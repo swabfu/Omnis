@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,22 +11,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-  Link2,
-  Image as ImageIcon,
-  FileText,
-  MessageSquare,
   MoreVertical,
   ExternalLink,
   Check,
   Archive,
   Trash2,
   FileEdit,
+  Tag,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ContentType, ItemStatus, Database } from '@/types/database'
 import { Tweet } from 'react-tweet'
 import { createClient } from '@/lib/supabase/client'
 import { EditItemDialog } from './edit-item-dialog'
+import { StatusIcon } from './status-icon'
+import { typeIcons, typeColors, BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -54,26 +53,7 @@ interface ItemCardProps {
   onDelete?: (id: string) => void
   onStatusChange?: (id: string, status: ItemStatus) => void
   onItemUpdated?: () => void
-}
-
-const typeIcons = {
-  link: Link2,
-  tweet: MessageSquare,
-  image: ImageIcon,
-  note: FileText,
-}
-
-const typeColors = {
-  link: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  tweet: 'bg-sky-500/10 text-sky-500 border-sky-500/20',
-  image: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  note: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-}
-
-const statusColors = {
-  inbox: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
-  done: 'bg-green-500/10 text-green-500 border-green-500/20',
-  archived: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
+  variant?: 'card' | 'list'
 }
 
 export function ItemCard({
@@ -90,12 +70,13 @@ export function ItemCard({
   onDelete,
   onStatusChange,
   onItemUpdated,
+  variant = 'card',
 }: ItemCardProps) {
-  const Icon = typeIcons[type]
+  const TypeIcon = typeIcons[type]
+  const typeColor = typeColors[type]
   const supabase = createClient()
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
-  // Build item object for edit dialog
   const item: ItemWithTags = {
     id,
     type,
@@ -122,7 +103,6 @@ export function ItemCard({
   }
 
   const renderContent = () => {
-    // Note type
     if (type === 'note') {
       return (
         <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -131,7 +111,6 @@ export function ItemCard({
       )
     }
 
-    // Tweet type
     if (type === 'tweet' && url) {
       const tweetId = url.match(/(twitter|x)\.com\/\w+\/status\/(\d+)/)?.[2]
       if (tweetId) {
@@ -139,7 +118,6 @@ export function ItemCard({
       }
     }
 
-    // Link type with OG data
     if (type === 'link' || type === 'tweet') {
       return (
         <a
@@ -155,13 +133,12 @@ export function ItemCard({
           )}
           <div className="flex items-center text-xs text-muted-foreground group-hover:text-foreground transition-colors">
             <span className="truncate">{url}</span>
-            <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
+            <ExternalLink className="h-3 w-3 flex-shrink-0" />
           </div>
         </a>
       )
     }
 
-    // Image type
     if (type === 'image' && image_path) {
       const { data: { publicUrl } } = supabase.storage
         .from('items')
@@ -182,39 +159,144 @@ export function ItemCard({
     return null
   }
 
+  const isList = variant === 'list'
+
+  // Consistent label rendering - all icons are h-4.5 w-4.5 (18px) with thick strokes
+  const renderLabels = () => (
+    <div className="flex items-center gap-2 flex-wrap">
+      {/* Type icon */}
+      <div
+        className={cn('flex items-center justify-center px-2 py-1 rounded-md', typeColor)}
+        title={type}
+      >
+        <TypeIcon className="h-4.5 w-4.5" strokeWidth={2.5} />
+      </div>
+
+      {/* Status icon */}
+      <StatusIcon status={status} />
+
+      {/* Tags */}
+      {tags.map((tag) => (
+        <div
+          key={tag.id}
+          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium"
+          style={{
+            backgroundColor: `${tag.color || '#3b82f6'}15`,
+            color: `${tag.color || '#3b82f6'}`,
+          }}
+          title={tag.name}
+        >
+          <Tag className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
+          <span>{tag.name}</span>
+        </div>
+      ))}
+    </div>
+  )
+
+  // List view
+  if (isList) {
+    return (
+      <>
+        <Card className="group transition-all hover:shadow-md">
+          <div className="flex items-center gap-3 px-3 py-2">
+            {/* Labels */}
+            <div className="flex-shrink-0">
+              {renderLabels()}
+            </div>
+
+            {/* Title/content */}
+            <div className="flex-1 min-w-0">
+              {title && type !== 'tweet' ? (
+                <h3 className="font-medium text-sm truncate">
+                  {type === 'link' && url ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors"
+                    >
+                      {title}
+                    </a>
+                  ) : (
+                    title
+                  )}
+                </h3>
+              ) : (description || content) ? (
+                <p className="text-sm text-muted-foreground truncate">
+                  {description || content}
+                </p>
+              ) : (
+                <span className="text-sm text-muted-foreground italic">No title</span>
+              )}
+            </div>
+
+            {/* Date */}
+            <time dateTime={created_at} className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">
+              {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
+            </time>
+
+            {/* Actions */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                  <FileEdit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                {status !== 'done' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('done')}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Mark as Done
+                  </DropdownMenuItem>
+                )}
+                {status !== 'inbox' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Move to Inbox
+                  </DropdownMenuItem>
+                )}
+                {status !== 'archived' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
+                    <Archive className="mr-2 h-4 w-4" />
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </Card>
+
+        <EditItemDialog
+          item={item}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onItemUpdated={onItemUpdated || (() => {})}
+        />
+      </>
+    )
+  }
+
+  // Card view (masonry/grid)
   return (
     <>
       <Card className="group overflow-hidden transition-all hover:shadow-md">
         <CardContent className="p-4">
-          {/* Header */}
+          {/* Header - labels and menu */}
           <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className={`p-1.5 rounded-md ${typeColors[type].split(' ')[0]}`}>
-                <Icon className="h-3.5 w-3.5" />
-              </div>
-              <Badge variant="outline" className={statusColors[status]}>
-                {status}
-              </Badge>
-              {tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="text-xs"
-                  style={{
-                    backgroundColor: `${tag.color || '#3b82f6'}20`,
-                    borderColor: `${tag.color || '#3b82f6'}40`,
-                    color: tag.color || '#3b82f6',
-                  }}
-                >
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
+            {renderLabels()}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreVertical className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MoreVertical className="h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -269,7 +351,7 @@ export function ItemCard({
           {/* Content */}
           {renderContent()}
 
-          {/* Footer */}
+          {/* Footer - date */}
           <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
             <time dateTime={created_at}>
               {formatDistanceToNow(new Date(created_at), { addSuffix: true })}

@@ -13,12 +13,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Link2, Image as ImageIcon, FileText, Loader2, Tag as TagIcon } from 'lucide-react'
+import { Plus, Loader2, Tag as TagIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchMetadata } from '@/lib/metadata'
 import { ContentType } from '@/types/database'
 import { useAuth } from '@/components/auth/auth-provider'
 import { TagSelector } from './tag-selector'
+import { typeIcons, typeColors } from '@/lib/type-icons'
 
 interface Tag {
   id: string
@@ -229,17 +230,29 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
 
         <Tabs defaultValue="link">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="link">
-              <Link2 className="h-4 w-4 mr-1" />
-              Link
+            <TabsTrigger value="link" className="gap-1.5" asChild>
+              <button type="button">
+                <span className={typeColors.link}>
+                  <typeIcons.link className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Link
+              </button>
             </TabsTrigger>
-            <TabsTrigger value="image">
-              <ImageIcon className="h-4 w-4 mr-1" />
-              Image
+            <TabsTrigger value="image" className="gap-1.5" asChild>
+              <button type="button">
+                <span className={typeColors.image}>
+                  <typeIcons.image className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Image
+              </button>
             </TabsTrigger>
-            <TabsTrigger value="note">
-              <FileText className="h-4 w-4 mr-1" />
-              Note
+            <TabsTrigger value="note" className="gap-1.5" asChild>
+              <button type="button">
+                <span className={typeColors.note}>
+                  <typeIcons.note className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Note
+              </button>
             </TabsTrigger>
           </TabsList>
 
@@ -306,8 +319,10 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
           <TabsContent value="image">
             <form onSubmit={handleImageUpload} className="space-y-4 mt-4">
               <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8">
-                <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
+                <span className={typeColors.image}>
+                  <typeIcons.image className="h-10 w-10" strokeWidth={2} />
+                </span>
+                <p className="text-sm text-muted-foreground mt-2">
                   {imageFile ? imageFile.name : 'Select an image to upload'}
                 </p>
                 <Input

@@ -5,10 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  Link2,
-  MessageSquare,
-  Image as ImageIcon,
-  FileText,
   Inbox,
   CheckCircle,
   Archive,
@@ -57,6 +53,18 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import {
+  typeIcons,
+  typeColors,
+  allItemsIcon,
+  NAV_ICON_SIZE,
+  NAV_ICON_STROKE_WIDTH,
+  ACTION_ICON_SIZE,
+  ACTION_ICON_STROKE_WIDTH,
+  OVERLAY_ICON_SIZE,
+  OVERLAY_ICON_STROKE_WIDTH,
+} from '@/lib/type-icons'
+import { statusColors } from '@/lib/status-icons'
 
 type Tag = Database['public']['Tables']['tags']['Row']
 
@@ -77,17 +85,17 @@ const PRESET_COLORS = [
 ]
 
 const navItems = [
-  { name: 'All Items', href: '/', icon: Inbox },
-  { name: 'Links', href: '/type/link', icon: Link2 },
-  { name: 'Tweets', href: '/type/tweet', icon: MessageSquare },
-  { name: 'Images', href: '/type/image', icon: ImageIcon },
-  { name: 'Notes', href: '/type/note', icon: FileText },
+  { name: 'All Items', href: '/', icon: allItemsIcon, color: typeColors.all },
+  { name: 'Links', href: '/type/link', icon: typeIcons.link, color: typeColors.link },
+  { name: 'Tweets', href: '/type/tweet', icon: typeIcons.tweet, color: typeColors.tweet },
+  { name: 'Images', href: '/type/image', icon: typeIcons.image, color: typeColors.image },
+  { name: 'Notes', href: '/type/note', icon: typeIcons.note, color: typeColors.note },
 ]
 
 const statusItems = [
-  { name: 'Inbox', href: '/status/inbox', icon: Inbox },
-  { name: 'Done', href: '/status/done', icon: CheckCircle },
-  { name: 'Archived', href: '/status/archived', icon: Archive },
+  { name: 'Inbox', href: '/status/inbox', icon: Inbox, color: statusColors.inbox },
+  { name: 'Done', href: '/status/done', icon: CheckCircle, color: statusColors.done },
+  { name: 'Archived', href: '/status/archived', icon: Archive, color: statusColors.archived },
 ]
 
 interface TagInlineEditProps {
@@ -121,7 +129,7 @@ function SortableTagItem({ tag, onUpdate, onDelete, isActive, deletingTagId }: S
     <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-50' : ''}>
       <div
         className={cn(
-          'group flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors relative',
+          'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors relative',
           isActive
             ? 'bg-accent text-accent-foreground'
             : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
@@ -217,15 +225,10 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
       }}>
         <PopoverTrigger asChild>
           <button
-            className="relative flex-shrink-0 transition-transform hover:scale-110 group/tag flex items-center justify-center"
+            className="relative flex-shrink-0 transition-transform hover:scale-110 flex items-center justify-center"
             onClick={() => setIsEditingColor(true)}
           >
-            <Tag className="h-5 w-5" strokeWidth={2.5} style={{ color: tag.color }} />
-            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/tag:opacity-100 transition-opacity">
-              <span className="drop-shadow-md">
-                <Pencil className="h-2 w-2 text-white" strokeWidth={3} />
-              </span>
-            </span>
+            <Tag className={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} style={{ color: tag.color }} />
           </button>
         </PopoverTrigger>
         <PopoverContent side="left" align="center" className="w-56 p-3">
@@ -289,7 +292,7 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
               className="h-6 py-0 px-1 text-sm"
               onClick={(e) => e.stopPropagation()}
             />
-            {isSaving && <Loader2 className="h-3 w-3 animate-spin" />}
+            {isSaving && <Loader2 className={ACTION_ICON_SIZE} animate-spin />}
           </div>
         ) : (
           <div className="flex items-center gap-1 w-full">
@@ -312,7 +315,7 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
                   className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted-foreground/20 opacity-0 group-hover/name:opacity-100 transition-opacity"
                   title="Edit tag name"
                 >
-                  <Pencil className="h-3 w-3" />
+                  <Pencil className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
                 </button>
               </span>
             </Link>
@@ -332,9 +335,9 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
         title="Delete tag"
       >
         {deletingTagId === tag.id ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
+          <Loader2 className={ACTION_ICON_SIZE} animate-spin />
         ) : (
-          <X className="h-3 w-3" />
+          <X className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
         )}
       </button>
     </>
@@ -516,7 +519,9 @@ export function Sidebar() {
                     : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <span className={cn('flex items-center justify-center', item.color)}>
+                  <Icon className={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+                </span>
                 {item.name}
               </Link>
             )
@@ -544,7 +549,9 @@ export function Sidebar() {
                     : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <span className={cn('flex items-center justify-center', item.color)}>
+                  <Icon className={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+                </span>
                 {item.name}
               </Link>
             )
@@ -563,7 +570,7 @@ export function Sidebar() {
               className="h-6 w-6 p-0"
               onClick={() => setTagManagerOpen(true)}
             >
-              <Plus className="h-3 w-3" />
+              <Plus className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
             </Button>
           </div>
           {tags.length > 0 ? (
@@ -591,7 +598,7 @@ export function Sidebar() {
                 {tags.length > 8 && (
                   <Link
                     href="/tags"
-                    className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent/50"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50"
                   >
                     View all {tags.length} tags
                   </Link>

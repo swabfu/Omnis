@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { ClientFeed } from '@/components/items/client-feed'
 import { ContentType, ItemStatus, Database } from '@/types/database'
+import type { ViewMode } from '@/components/items/view-toggle'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -25,6 +26,7 @@ interface HomeClientProps {
 export function HomeClient({ initialType, initialStatus }: HomeClientProps) {
   const [searchResults, setSearchResults] = useState<ItemWithTags[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+  const [view, setView] = useState<ViewMode>('masonry')
 
   const handleSearchResults = useCallback((items: ItemWithTags[]) => {
     setSearchResults(items)
@@ -36,6 +38,10 @@ export function HomeClient({ initialType, initialStatus }: HomeClientProps) {
     setIsSearching(false)
   }, [])
 
+  const handleViewChange = useCallback((newView: ViewMode) => {
+    setView(newView)
+  }, [])
+
   return (
     <div className="flex h-screen">
       <Sidebar />
@@ -44,6 +50,8 @@ export function HomeClient({ initialType, initialStatus }: HomeClientProps) {
           onSearchResults={handleSearchResults}
           onSearchClear={handleSearchClear}
           isSearching={isSearching}
+          view={view}
+          onViewChange={handleViewChange}
         />
         <div className="flex-1 overflow-auto p-6">
           <div className="mx-auto max-w-7xl">
@@ -51,6 +59,8 @@ export function HomeClient({ initialType, initialStatus }: HomeClientProps) {
               initialType={initialType}
               initialStatus={initialStatus}
               searchResults={searchResults}
+              view={view}
+              onViewChange={handleViewChange}
             />
           </div>
         </div>

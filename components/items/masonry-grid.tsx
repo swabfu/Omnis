@@ -8,7 +8,7 @@ interface MasonryGridProps {
 export function MasonryGrid({ children, columns = 3 }: MasonryGridProps) {
   return (
     <div
-      className="masonry-grid"
+      className="masonry-grid transition-opacity duration-200"
       style={{
         columnCount: columns,
         columnGap: '1rem',

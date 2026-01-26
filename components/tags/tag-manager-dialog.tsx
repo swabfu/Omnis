@@ -25,6 +25,7 @@ import {
 import { Plus, X, Tag, Loader2, Check } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
 import { Database } from '@/types/database'
+import { BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH, ACTION_ICON_SIZE, ACTION_ICON_STROKE_WIDTH } from '@/lib/type-icons'
 
 type Tag = Database['public']['Tables']['tags']['Row']
 
@@ -206,7 +207,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
             {/* Create New Tag Section */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-muted-foreground" />
+                <Tag className={BADGE_ICON_SIZE} text-muted-foreground strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 <span className="text-sm font-medium">Create New Tag</span>
               </div>
 
@@ -235,7 +236,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       }}
                     >
                       {selectedColor === color && (
-                        <Check className="h-3 w-3 mx-auto" style={{ color: 'white' }} />
+                        <Check className={ACTION_ICON_SIZE} mx-auto strokeWidth={ACTION_ICON_STROKE_WIDTH} style={{ color: 'white' }} />
                       )}
                     </button>
                   ))}
@@ -270,7 +271,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       border: `1px solid ${selectedColor}40`,
                     }}
                   >
-                    <Tag className="h-3 w-3" />
+                    <Tag className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
                     {newTagName}
                   </span>
                 </div>
@@ -309,7 +310,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       className="flex items-center justify-between group rounded-md border px-3 py-2 hover:bg-accent/50"
                     >
                       <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4" strokeWidth={2.5} style={{ color: tag.color }} />
+                        <Tag className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} style={{ color: tag.color }} />
                         <span className="text-sm">{tag.name}</span>
                       </div>
                       <Button
@@ -320,9 +321,9 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                         disabled={deletingTagId === tag.id}
                       >
                         {deletingTagId === tag.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className={ACTION_ICON_SIZE} animate-spin />
                         ) : (
-                          <X className="h-3 w-3" />
+                          <X className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
                         )}
                       </Button>
                     </div>

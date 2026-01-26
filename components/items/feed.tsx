@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ContentType, ItemStatus, Database } from '@/types/database'
 import { ItemCard } from './item-card'
 import { MasonryGrid, MasonryItem } from './masonry-grid'
 import { UniformGrid } from './uniform-grid'
+import { ListView } from './list-view'
 import { Loader2 } from 'lucide-react'
+import type { ViewMode } from './view-toggle'
+import { cn } from '@/lib/utils'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -26,13 +29,51 @@ interface FeedProps {
   initialType?: ContentType
   initialStatus?: ItemStatus
   searchResults?: ItemWithTags[] | null
+  view?: ViewMode
+  onViewChange?: (view: ViewMode) => void
 }
 
-export function Feed({ initialType, initialStatus, searchResults }: FeedProps) {
+export function Feed({ initialType, initialStatus, searchResults, view, onViewChange }: FeedProps) {
   const [items, setItems] = useState<ItemWithTags[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'masonry' | 'uniform'>('masonry')
+  const [internalView, setInternalView] = useState<ViewMode>('masonry')
+  const [transitionPhase, setTransitionPhase] = useState<'idle' | 'out' | 'in'>('idle')
+  const [displayView, setDisplayView] = useState<ViewMode>('masonry')
+  const currentView = view ?? internalView
   const supabase = createClient()
+  const prevViewRef = useRef(currentView)
+
+  // Handle view transition with slide/fade animation
+  useEffect(() => {
+    if (prevViewRef.current !== currentView && !loading) {
+      // Phase 1: Fade out + slide out (gentle)
+      setTransitionPhase('out')
+      const outTimer = setTimeout(() => {
+        // Phase 2: Switch content during fade
+        setDisplayView(currentView)
+        // Phase 3: Fade in + slide in
+        setTransitionPhase('in')
+        const inTimer = setTimeout(() => {
+          setTransitionPhase('idle')
+        }, 300)
+        prevViewRef.current = currentView
+        return () => clearTimeout(inTimer)
+      }, 250)
+      return () => clearTimeout(outTimer)
+    }
+  }, [currentView, loading])
+
+  // Get animation classes based on transition phase
+  const getAnimationClasses = () => {
+    switch (transitionPhase) {
+      case 'out':
+        return 'opacity-50 scale-[0.99] translate-y-0.5'
+      case 'in':
+        return 'opacity-100 scale-100 translate-y-0'
+      default:
+        return 'opacity-100 scale-100 translate-y-0'
+    }
+  }
 
   const fetchItems = async () => {
     // If search results are provided, use those
@@ -127,22 +168,57 @@ export function Feed({ initialType, initialStatus, searchResults }: FeedProps) {
     )
   }
 
-  const GridComponent = view === 'masonry' ? MasonryGrid : UniformGrid
-  const ItemWrapper = view === 'masonry' ? MasonryItem : ({ children }: { children: React.ReactNode }) => <>{children}</>
+  // Render based on view mode
+  const viewContent = (
+    <>
+      {displayView === 'list' ? (
+        <ListView>
+          {items.map((item) => (
+            <ItemCard
+              key={item.id}
+              {...item}
+              tags={item.tags || []}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+              onItemUpdated={handleItemUpdated}
+              variant="list"
+            />
+          ))}
+        </ListView>
+      ) : (
+        (() => {
+          const GridComponent = displayView === 'masonry' ? MasonryGrid : UniformGrid
+          const ItemWrapper = displayView === 'masonry' ? MasonryItem : ({ children }: { children: React.ReactNode }) => <>{children}</>
+
+          return (
+            <GridComponent>
+              {items.map((item) => (
+                <ItemWrapper key={item.id}>
+                  <ItemCard
+                    {...item}
+                    tags={item.tags || []}
+                    onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
+                    onItemUpdated={handleItemUpdated}
+                  />
+                </ItemWrapper>
+              ))}
+            </GridComponent>
+          )
+        })()
+      )}
+    </>
+  )
 
   return (
-    <GridComponent>
-      {items.map((item) => (
-        <ItemWrapper key={item.id}>
-          <ItemCard
-            {...item}
-            tags={item.tags || []}
-            onDelete={handleDelete}
-            onStatusChange={handleStatusChange}
-            onItemUpdated={handleItemUpdated}
-          />
-        </ItemWrapper>
-      ))}
-    </GridComponent>
+    <div
+      className={cn(
+        // Smooth transition with ease-in-out for natural feel
+        'transition-all duration-250 ease-in-out origin-top',
+        getAnimationClasses()
+      )}
+    >
+      {viewContent}
+    </div>
   )
 }
