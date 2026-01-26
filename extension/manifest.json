@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Omnis Save",
+  "version": "1.0.0",
+  "description": "Save links to your Omnis second brain",
+  "icons": {
+    "48": "icon.png"
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
