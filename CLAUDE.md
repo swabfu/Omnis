@@ -39,11 +39,13 @@ npm run lint     # Run ESLint
 
 | Need | File | Import |
 |------|------|--------|
-| Icon sizes | `lib/type-icons.tsx` | `NAV_ICON_SIZE`, `ACTION_ICON_SIZE`, `BADGE_ICON_SIZE`, `OVERLAY_ICON_SIZE` |
+| Icon sizes | `lib/type-icons.tsx` | `NAV_ICON_SIZE`, `ACTION_ICON_SIZE`, `BADGE_ICON_SIZE`, `OVERLAY_ICON_SIZE`, `SMALL_ICON_SIZE`, `LABEL_ICON_SIZE`, `DROPDOWN_ICON_SIZE`, `LOADER_ICON_SIZE`, `LARGE_ICON_SIZE`, `SUCCESS_ICON_SIZE` |
 | Icon strokes | `lib/type-icons.tsx` | `NAV_ICON_STROKE_WIDTH`, `ACTION_ICON_STROKE_WIDTH`, etc. |
 | Type icons/colors | `lib/type-icons.tsx` | `typeIcons.link`, `typeColors.link` |
 | Status icons/colors | `lib/status-icons.tsx` | `statusIcons.inbox`, `statusColors.inbox`, `statusBadgeColors.done` |
+| Status constants | `lib/status-icons.tsx` | `INBOX_STATUS`, `DONE_STATUS`, `ARCHIVED_STATUS` |
 | Status component | `components/items/status-icon.tsx` | `<StatusIcon status="inbox" />` |
+| Tag colors | `lib/tag-colors.ts` | `PRESET_TAG_COLORS`, `DEFAULT_TAG_COLOR` |
 | View modes | `components/items/view-toggle.tsx` | `type ViewMode = 'masonry' \ 'uniform' \ 'list'` |
 | Supabase (browser) | `lib/supabase/client.ts` | `createClient()` |
 | Supabase (server) | `lib/supabase/server.ts` | `createClient()` |
@@ -173,19 +175,36 @@ createServerClient<Database>(...)
 **File:** `lib/type-icons.tsx`
 
 **Constants (never hardcode):**
-- `NAV_ICON_SIZE = 'h-5 w-5'` / `NAV_ICON_STROKE_WIDTH = 2.5`
-- `ACTION_ICON_SIZE = 'h-3 w-3'` / `ACTION_ICON_STROKE_WIDTH = 2.5`
-- `BADGE_ICON_SIZE = 'h-4 w-4'` / `BADGE_ICON_STROKE_WIDTH = 2.5`
-- `OVERLAY_ICON_SIZE = 'h-2.5 w-2.5'` / `OVERLAY_ICON_STROKE_WIDTH = 3`
-- `SMALL_ICON_SIZE = 'h-3 w-3'`
+- `NAV_ICON_SIZE = 'h-5 w-5'` / `NAV_ICON_STROKE_WIDTH = 2.5` (nav items)
+- `ACTION_ICON_SIZE = 'h-3 w-3'` / `ACTION_ICON_STROKE_WIDTH = 2.5` (edit, delete, plus, x)
+- `BADGE_ICON_SIZE = 'h-4 w-4'` / `BADGE_ICON_STROKE_WIDTH = 2.5` (tags, small icons in cards)
+- `OVERLAY_ICON_SIZE = 'h-2.5 w-2.5'` / `OVERLAY_ICON_STROKE_WIDTH = 3` (pencil on tag hover)
+- `SMALL_ICON_SIZE = 'h-3 w-3'` (external links)
+- `LABEL_ICON_SIZE = 'h-4.5 w-4.5'` / `LABEL_ICON_STROKE_WIDTH = 2.5` (badge labels on item cards)
+- `DROPDOWN_ICON_SIZE = 'h-3.5 w-3.5'` / `DROPDOWN_ICON_STROKE_WIDTH = 2.5` (dropdown triggers)
+- `LOADER_ICON_SIZE = 'h-8 w-8'` / `LOADER_ICON_STROKE_WIDTH = 2.5` (loading spinners)
+- `LARGE_ICON_SIZE = 'h-10 w-10'` / `LARGE_ICON_STROKE_WIDTH = 2` (upload placeholders)
+- `SUCCESS_ICON_SIZE = 'h-16 w-16'` / `SUCCESS_ICON_STROKE_WIDTH = 2.5` (auth success pages)
 
 **Icons:** `all` (Inbox), `link` (Link2), `tweet` (Twitter), `image` (ImageIcon), `note` (FileText)
 
 **Colors:** `all` (gray), `link` (green), `tweet` (sky), `image` (red), `note` (yellow)
 
 ```typescript
-import { typeIcons, typeColors, NAV_ICON_SIZE, NAV_ICON_STROKE_WIDTH } from '@/lib/type-icons'
-<Icon className={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+import { typeIcons, typeColors, BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH } from '@/lib/type-icons'
+<Icon className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
+```
+
+## Tag Colors
+
+**File:** `lib/tag-colors.ts`
+
+**Constants (never hardcode):**
+- `PRESET_TAG_COLORS` - Array of 17 hex colors for tag color picker
+- `DEFAULT_TAG_COLOR = '#3b82f6'` - Default blue color for new tags
+
+```typescript
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
 ```
 
 ## Status Icons & Colors
@@ -198,10 +217,18 @@ import { typeIcons, typeColors, NAV_ICON_SIZE, NAV_ICON_STROKE_WIDTH } from '@/l
 
 **Variants:** `statusColors` (nav, text only), `statusBadgeColors` (badges with bg)
 
+**Status constants (avoid magic strings):**
+- `INBOX_STATUS = 'inbox'`
+- `DONE_STATUS = 'done'`
+- `ARCHIVED_STATUS = 'archived'`
+
+**Badge icon size:**
+- `STATUS_BADGE_ICON_SIZE = 'h-4.5 w-4.5'` / `STATUS_BADGE_STROKE_WIDTH = 2.5`
+
 ```typescript
 import { StatusIcon } from '@/components/items/status-icon'
-import { statusColors } from '@/lib/status-icons'
-<StatusIcon status="inbox" />
+import { statusColors, DONE_STATUS } from '@/lib/status-icons'
+<StatusIcon status={DONE_STATUS} />
 ```
 
 ## View System

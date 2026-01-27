@@ -16,6 +16,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ContentType, ItemStatus, Database } from '@/types/database'
 import { TagSelector } from './tag-selector'
 import { dispatchTagsUpdated } from '@/components/layout/sidebar'
+import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -156,7 +157,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <TagIcon className="h-4 w-4" />
+              <TagIcon className={BADGE_ICON_SIZE} />
               <span>Tags</span>
             </div>
             <TagSelector
@@ -176,7 +177,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
           <p className="text-sm text-muted-foreground">Images can be tagged but not edited.</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <TagIcon className="h-4 w-4" />
+              <TagIcon className={BADGE_ICON_SIZE} />
               <span>Tags</span>
             </div>
             <TagSelector
@@ -223,7 +224,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
         </div>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <TagIcon className="h-4 w-4" />
+            <TagIcon className={BADGE_ICON_SIZE} />
             <span>Tags</span>
           </div>
           <TagSelector
@@ -256,7 +257,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
             Cancel
           </Button>
           <Button onClick={handleUpdate} disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
             Save Changes
           </Button>
         </div>

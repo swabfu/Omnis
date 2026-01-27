@@ -3,6 +3,7 @@
 import { LayoutGrid, LayoutList, Columns } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 
 export type ViewMode = 'masonry' | 'uniform' | 'list'
 
@@ -34,7 +35,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
           )}
           title={label}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className={BADGE_ICON_SIZE} />
           <span className="sr-only">{label}</span>
         </Button>
       ))}

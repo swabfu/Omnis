@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { BADGE_ICON_SIZE, SUCCESS_ICON_SIZE } from '@/lib/type-icons'
+import { statusColors } from '@/lib/status-icons'
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
@@ -64,7 +66,7 @@ export default function UpdatePasswordPage() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-8">
-              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <CheckCircle className={`${SUCCESS_ICON_SIZE} ${statusColors.done} mb-4`} />
               <h2 className="text-xl font-semibold mb-2">Password updated!</h2>
               <p className="text-center text-muted-foreground">
                 Redirecting you to login...
@@ -124,7 +126,7 @@ export default function UpdatePasswordPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
               Update Password
             </Button>
           </form>

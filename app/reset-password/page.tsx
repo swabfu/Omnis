@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { BADGE_ICON_SIZE, SUCCESS_ICON_SIZE } from '@/lib/type-icons'
+import { statusColors } from '@/lib/status-icons'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
@@ -54,7 +56,7 @@ export default function ResetPasswordPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center py-8">
-              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <CheckCircle className={`${SUCCESS_ICON_SIZE} ${statusColors.done} mb-4`} />
               <p className="text-center text-muted-foreground">
                 Click the link in the email to reset your password.
               </p>
@@ -98,7 +100,7 @@ export default function ResetPasswordPage() {
             </div>
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className={BADGE_ICON_SIZE} />
                 {error}
               </div>
             )}
@@ -108,7 +110,7 @@ export default function ResetPasswordPage() {
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
               Send Reset Link
             </Button>
           </form>

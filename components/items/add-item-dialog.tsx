@@ -19,7 +19,14 @@ import { fetchMetadata } from '@/lib/metadata'
 import { ContentType } from '@/types/database'
 import { useAuth } from '@/components/auth/auth-provider'
 import { TagSelector } from './tag-selector'
-import { typeIcons, typeColors } from '@/lib/type-icons'
+import {
+  typeIcons,
+  typeColors,
+  BADGE_ICON_SIZE,
+  BADGE_ICON_STROKE_WIDTH,
+  LARGE_ICON_SIZE,
+  LARGE_ICON_STROKE_WIDTH,
+} from '@/lib/type-icons'
 
 interface Tag {
   id: string
@@ -216,7 +223,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
     }}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className={`mr-2 ${BADGE_ICON_SIZE}`} />
           Add Item
         </Button>
       </DialogTrigger>
@@ -233,7 +240,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
             <TabsTrigger value="link" className="gap-1.5" asChild>
               <button type="button">
                 <span className={typeColors.link}>
-                  <typeIcons.link className="h-4 w-4" strokeWidth={2.5} />
+                  <typeIcons.link className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 </span>
                 Link
               </button>
@@ -241,7 +248,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
             <TabsTrigger value="image" className="gap-1.5" asChild>
               <button type="button">
                 <span className={typeColors.image}>
-                  <typeIcons.image className="h-4 w-4" strokeWidth={2.5} />
+                  <typeIcons.image className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 </span>
                 Image
               </button>
@@ -249,7 +256,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
             <TabsTrigger value="note" className="gap-1.5" asChild>
               <button type="button">
                 <span className={typeColors.note}>
-                  <typeIcons.note className="h-4 w-4" strokeWidth={2.5} />
+                  <typeIcons.note className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 </span>
                 Note
               </button>
@@ -300,7 +307,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
               )}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <TagIcon className="h-4 w-4" />
+                  <TagIcon className={BADGE_ICON_SIZE} />
                   <span>Tags</span>
                 </div>
                 <TagSelector
@@ -310,7 +317,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !url}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
                 Save Link
               </Button>
             </form>
@@ -320,7 +327,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
             <form onSubmit={handleImageUpload} className="space-y-4 mt-4">
               <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8">
                 <span className={typeColors.image}>
-                  <typeIcons.image className="h-10 w-10" strokeWidth={2} />
+                  <typeIcons.image className={LARGE_ICON_SIZE} strokeWidth={LARGE_ICON_STROKE_WIDTH} />
                 </span>
                 <p className="text-sm text-muted-foreground mt-2">
                   {imageFile ? imageFile.name : 'Select an image to upload'}
@@ -335,7 +342,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <TagIcon className="h-4 w-4" />
+                  <TagIcon className={BADGE_ICON_SIZE} />
                   <span>Tags</span>
                 </div>
                 <TagSelector
@@ -345,7 +352,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !imageFile}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
                 Upload Image
               </Button>
             </form>
@@ -363,7 +370,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
               />
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <TagIcon className="h-4 w-4" />
+                  <TagIcon className={BADGE_ICON_SIZE} />
                   <span>Tags</span>
                 </div>
                 <TagSelector
@@ -373,7 +380,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !content.trim()}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
                 Save Note
               </Button>
             </form>

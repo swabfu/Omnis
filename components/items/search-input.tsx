@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ContentType, ItemStatus, Database } from '@/types/database'
+import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -90,7 +91,7 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
 
   return (
     <div className="relative max-w-md">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className={`absolute left-3 top-1/2 ${BADGE_ICON_SIZE} -translate-y-1/2 text-muted-foreground`} />
       <Input
         type="search"
         placeholder="Search items... (use #tag for tags)"

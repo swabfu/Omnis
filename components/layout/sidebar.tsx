@@ -63,8 +63,11 @@ import {
   ACTION_ICON_STROKE_WIDTH,
   OVERLAY_ICON_SIZE,
   OVERLAY_ICON_STROKE_WIDTH,
+  BADGE_ICON_SIZE,
+  BADGE_ICON_STROKE_WIDTH,
 } from '@/lib/type-icons'
 import { statusColors } from '@/lib/status-icons'
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
 
 type Tag = Database['public']['Tables']['tags']['Row']
 
@@ -75,14 +78,6 @@ export const TAGS_UPDATED_EVENT = 'omnis:tags-updated'
 export function dispatchTagsUpdated() {
   window.dispatchEvent(new CustomEvent(TAGS_UPDATED_EVENT))
 }
-
-// Preset colors for tag selection
-const PRESET_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e',
-]
 
 const navItems = [
   { name: 'All Items', href: '/', icon: allItemsIcon, color: typeColors.all },
@@ -140,7 +135,7 @@ function SortableTagItem({ tag, onUpdate, onDelete, isActive, deletingTagId }: S
           className="absolute -left-1 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity touch-none"
           {...listeners}
         >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <GripVertical className={BADGE_ICON_SIZE} />
         </div>
 
         {/* TagInlineEdit content without the wrapper div */}
@@ -236,7 +231,7 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
             <p className="text-xs font-medium">Edit Tag Color</p>
             {/* Preset colors */}
             <div className="grid grid-cols-9 gap-1.5">
-              {PRESET_COLORS.map((color) => (
+              {PRESET_TAG_COLORS.map((color) => (
                 <button
                   key={color}
                   type="button"
@@ -263,7 +258,7 @@ function PopoverWrapper({ tag, onUpdate, onDelete, isActive, deletingTagId }: Po
                 value={customColor}
                 onChange={(e) => setCustomColor(e.target.value)}
                 className="h-7 flex-1 text-xs font-mono"
-                placeholder="#3b82f6"
+                placeholder={DEFAULT_TAG_COLOR}
               />
               <Button
                 size="sm"
@@ -620,7 +615,7 @@ export function Sidebar() {
           className="w-full justify-start text-muted-foreground"
           onClick={handleSignOut}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className={`mr-2 ${BADGE_ICON_SIZE}`} />
           Sign Out
         </Button>
       </div>

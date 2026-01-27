@@ -5,6 +5,7 @@ import { ViewToggle, type ViewMode } from '@/components/items/view-toggle'
 import type { ItemWithTags } from '@/components/items/feed'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 
 interface HeaderProps {
   onSearchResults?: (items: ItemWithTags[]) => void
@@ -29,7 +30,7 @@ export function Header({ onSearchResults, onSearchClear, isSearching, view, onVi
           />
         ) : (
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className={`absolute left-3 top-1/2 ${BADGE_ICON_SIZE} -translate-y-1/2 text-muted-foreground`} />
             <Input
               type="search"
               placeholder="Search..."

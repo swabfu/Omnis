@@ -1,6 +1,10 @@
 import { LucideIcon, Inbox, CheckCircle, Archive } from 'lucide-react'
 import { ItemStatus } from '@/types/database'
 
+// Status badge icon size (used in item cards and status badges)
+export const STATUS_BADGE_ICON_SIZE = 'h-4.5 w-4.5'
+export const STATUS_BADGE_STROKE_WIDTH = 2.5
+
 export const statusIcons: Record<ItemStatus, LucideIcon> = {
   inbox: Inbox,
   done: CheckCircle,
@@ -27,3 +31,8 @@ export const statusLabels: Record<ItemStatus, string> = {
   done: 'Done',
   archived: 'Archived',
 }
+
+// Status value constants - use instead of magic strings
+export const INBOX_STATUS: ItemStatus = 'inbox'
+export const DONE_STATUS: ItemStatus = 'done'
+export const ARCHIVED_STATUS: ItemStatus = 'archived'

@@ -25,7 +25,17 @@ import { Tweet } from 'react-tweet'
 import { createClient } from '@/lib/supabase/client'
 import { EditItemDialog } from './edit-item-dialog'
 import { StatusIcon } from './status-icon'
-import { typeIcons, typeColors, BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH } from '@/lib/type-icons'
+import {
+  typeIcons,
+  typeColors,
+  BADGE_ICON_SIZE,
+  BADGE_ICON_STROKE_WIDTH,
+  SMALL_ICON_SIZE,
+  LABEL_ICON_SIZE,
+  LABEL_ICON_STROKE_WIDTH,
+  DROPDOWN_ICON_SIZE,
+} from '@/lib/type-icons'
+import { DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -133,7 +143,7 @@ export function ItemCard({
           )}
           <div className="flex items-center text-xs text-muted-foreground group-hover:text-foreground transition-colors">
             <span className="truncate">{url}</span>
-            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+            <ExternalLink className={SMALL_ICON_SIZE} />
           </div>
         </a>
       )
@@ -169,7 +179,7 @@ export function ItemCard({
         className={cn('flex items-center justify-center px-2 py-1 rounded-md', typeColor)}
         title={type}
       >
-        <TypeIcon className="h-4.5 w-4.5" strokeWidth={2.5} />
+        <TypeIcon className={LABEL_ICON_SIZE} strokeWidth={LABEL_ICON_STROKE_WIDTH} />
       </div>
 
       {/* Status icon */}
@@ -181,8 +191,8 @@ export function ItemCard({
           key={tag.id}
           className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium"
           style={{
-            backgroundColor: `${tag.color || '#3b82f6'}15`,
-            color: `${tag.color || '#3b82f6'}`,
+            backgroundColor: `${tag.color || DEFAULT_TAG_COLOR}15`,
+            color: `${tag.color || DEFAULT_TAG_COLOR}`,
           }}
           title={tag.name}
         >
@@ -239,34 +249,34 @@ export function ItemCard({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className="h-3.5 w-3.5" />
+                  <MoreVertical className={DROPDOWN_ICON_SIZE} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                  <FileEdit className="mr-2 h-4 w-4" />
+                  <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Edit
                 </DropdownMenuItem>
                 {status !== 'done' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('done')}>
-                    <Check className="mr-2 h-4 w-4" />
+                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Mark as Done
                   </DropdownMenuItem>
                 )}
                 {status !== 'inbox' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
-                    <Check className="mr-2 h-4 w-4" />
+                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Move to Inbox
                   </DropdownMenuItem>
                 )}
                 {status !== 'archived' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
-                    <Archive className="mr-2 h-4 w-4" />
+                    <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Archive
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -296,34 +306,34 @@ export function ItemCard({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreVertical className="h-3.5 w-3.5" />
+                  <MoreVertical className={DROPDOWN_ICON_SIZE} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                  <FileEdit className="mr-2 h-4 w-4" />
+                  <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Edit
                 </DropdownMenuItem>
                 {status !== 'done' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('done')}>
-                    <Check className="mr-2 h-4 w-4" />
+                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Mark as Done
                   </DropdownMenuItem>
                 )}
                 {status !== 'inbox' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
-                    <Check className="mr-2 h-4 w-4" />
+                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Move to Inbox
                   </DropdownMenuItem>
                 )}
                 {status !== 'archived' && (
                   <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
-                    <Archive className="mr-2 h-4 w-4" />
+                    <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Archive
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -20,6 +20,26 @@ export const BADGE_ICON_STROKE_WIDTH = 2.5
 // Small inline icons (external links, etc.)
 export const SMALL_ICON_SIZE = 'h-3 w-3'
 
+// Label icon size (badge labels on item cards)
+export const LABEL_ICON_SIZE = 'h-4.5 w-4.5'
+export const LABEL_ICON_STROKE_WIDTH = 2.5
+
+// Dropdown trigger icon size
+export const DROPDOWN_ICON_SIZE = 'h-3.5 w-3.5'
+export const DROPDOWN_ICON_STROKE_WIDTH = 2.5
+
+// Loader/spinner icon size
+export const LOADER_ICON_SIZE = 'h-8 w-8'
+export const LOADER_ICON_STROKE_WIDTH = 2.5
+
+// Success icon size (auth pages)
+export const SUCCESS_ICON_SIZE = 'h-16 w-16'
+export const SUCCESS_ICON_STROKE_WIDTH = 2.5
+
+// Large icon size (upload placeholders, etc.)
+export const LARGE_ICON_SIZE = 'h-10 w-10'
+export const LARGE_ICON_STROKE_WIDTH = 2
+
 export const typeIcons: Record<ContentType, LucideIcon> = {
   link: Link2,
   tweet: Twitter,

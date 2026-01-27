@@ -25,30 +25,15 @@ import {
 import { Plus, X, Tag, Loader2, Check } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
 import { Database } from '@/types/database'
-import { BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH, ACTION_ICON_SIZE, ACTION_ICON_STROKE_WIDTH } from '@/lib/type-icons'
+import {
+  BADGE_ICON_SIZE,
+  BADGE_ICON_STROKE_WIDTH,
+  ACTION_ICON_SIZE,
+  ACTION_ICON_STROKE_WIDTH,
+} from '@/lib/type-icons'
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
 
 type Tag = Database['public']['Tables']['tags']['Row']
-
-// Preset colors for tag selection
-const PRESET_COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#f59e0b', // amber
-  '#eab308', // yellow
-  '#84cc16', // lime
-  '#22c55e', // green
-  '#10b981', // emerald
-  '#14b8a6', // teal
-  '#06b6d4', // cyan
-  '#0ea5e9', // sky
-  '#3b82f6', // blue (default)
-  '#6366f1', // indigo
-  '#8b5cf6', // violet
-  '#a855f7', // purple
-  '#d946ef', // fuchsia
-  '#ec4899', // pink
-  '#f43f5e', // rose
-]
 
 interface TagManagerDialogProps {
   open: boolean
@@ -61,7 +46,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
   const { user } = useAuth()
   const [tags, setTags] = useState<Tag[]>([])
   const [newTagName, setNewTagName] = useState('')
-  const [selectedColor, setSelectedColor] = useState('#3b82f6')
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_TAG_COLOR)
   const [loading, setLoading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null)
@@ -135,7 +120,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
       if (newTag) {
         setTags([...tags, newTag])
         setNewTagName('')
-        setSelectedColor('#3b82f6')
+        setSelectedColor(DEFAULT_TAG_COLOR)
         onTagCreated?.()
       }
     } catch (error) {
@@ -223,7 +208,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
               <div className="space-y-2">
                 <span className="text-xs text-muted-foreground">Color</span>
                 <div className="flex flex-wrap gap-2">
-                  {PRESET_COLORS.map((color) => (
+                  {PRESET_TAG_COLORS.map((color) => (
                     <button
                       key={color}
                       type="button"
@@ -254,7 +239,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                     value={selectedColor}
                     onChange={(e) => setSelectedColor(e.target.value)}
                     className="h-8 flex-1 text-xs font-mono"
-                    placeholder="#3b82f6"
+                    placeholder={DEFAULT_TAG_COLOR}
                   />
                 </div>
               </div>
@@ -284,12 +269,12 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} />
                     Creating...
                   </>
                 ) : (
                   <>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Create Tag
                   </>
                 )}

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { BADGE_ICON_SIZE, SUCCESS_ICON_SIZE } from '@/lib/type-icons'
+import { statusColors } from '@/lib/status-icons'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -88,7 +90,7 @@ export default function SignupPage() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-8">
-              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <CheckCircle className={`${SUCCESS_ICON_SIZE} ${statusColors.done} mb-4`} />
               <h2 className="text-xl font-semibold mb-2">Account created!</h2>
               <p className="text-center text-muted-foreground">
                 Redirecting you to login...
@@ -161,12 +163,12 @@ export default function SignupPage() {
             </div>
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <AlertCircle className={BADGE_ICON_SIZE} />
                 <span>{error}</span>
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
               Create Account
             </Button>
           </form>

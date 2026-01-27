@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { X, Plus, Palette } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
 import { ACTION_ICON_SIZE, ACTION_ICON_STROKE_WIDTH } from '@/lib/type-icons'
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
 
 interface Tag {
   id: string
@@ -23,19 +24,11 @@ interface TagSelectorProps {
   onTagCreated?: () => void
 }
 
-// Preset colors for tag selection
-const PRESET_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e',
-]
-
 export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }: TagSelectorProps) {
   const { user } = useAuth()
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [newTagName, setNewTagName] = useState('')
-  const [selectedColor, setSelectedColor] = useState('#3b82f6')
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_TAG_COLOR)
   const [showInput, setShowInput] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const supabase = createClient()
@@ -113,7 +106,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
     }
 
     setNewTagName('')
-    setSelectedColor('#3b82f6')
+    setSelectedColor(DEFAULT_TAG_COLOR)
     setShowInput(false)
   }
 
@@ -144,9 +137,9 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
               variant="secondary"
               className="gap-1 pl-2"
               style={{
-                backgroundColor: `${tag.color || '#3b82f6'}20`,
-                borderColor: `${tag.color || '#3b82f6'}40`,
-                color: tag.color || '#3b82f6',
+                backgroundColor: `${tag.color || DEFAULT_TAG_COLOR}20`,
+                borderColor: `${tag.color || DEFAULT_TAG_COLOR}40`,
+                color: tag.color || DEFAULT_TAG_COLOR,
               }}
             >
               {tag.name}
@@ -195,7 +188,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                   <div className="space-y-2">
                     <p className="text-xs font-medium">Pick a color</p>
                     <div className="grid grid-cols-9 gap-1.5">
-                      {PRESET_COLORS.map((color) => (
+                      {PRESET_TAG_COLORS.map((color) => (
                         <button
                           key={color}
                           type="button"
@@ -224,7 +217,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                         value={selectedColor}
                         onChange={(e) => setSelectedColor(e.target.value)}
                         className="h-7 flex-1 text-xs font-mono"
-                        placeholder="#3b82f6"
+                        placeholder={DEFAULT_TAG_COLOR}
                       />
                     </div>
                   </div>
@@ -253,8 +246,8 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
               variant="outline"
               className="cursor-pointer hover:bg-accent"
               style={{
-                borderColor: `${tag.color || '#3b82f6'}60`,
-                color: tag.color || '#3b82f6',
+                borderColor: `${tag.color || DEFAULT_TAG_COLOR}60`,
+                color: tag.color || DEFAULT_TAG_COLOR,
               }}
               onClick={() => handleToggleTag(tag)}
             >

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -62,7 +63,7 @@ export function LoginForm() {
         <CardContent>
           {showSuccess && (
             <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircle className={BADGE_ICON_SIZE} />
               Account created! Please sign in below.
             </div>
           )}
@@ -101,7 +102,7 @@ export function LoginForm() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Loader2 className={`mr-2 ${BADGE_ICON_SIZE} animate-spin`} /> : null}
               Sign In
             </Button>
           </form>

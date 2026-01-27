@@ -1,7 +1,7 @@
 'use client'
 
 import { ItemStatus } from '@/types/database'
-import { statusIcons, statusBadgeColors, statusLabels } from '@/lib/status-icons'
+import { statusIcons, statusBadgeColors, statusLabels, STATUS_BADGE_ICON_SIZE, STATUS_BADGE_STROKE_WIDTH } from '@/lib/status-icons'
 import { cn } from '@/lib/utils'
 
 interface StatusIconProps {
@@ -24,7 +24,7 @@ export function StatusIcon({ status, showLabel = false, className }: StatusIconP
       )}
       title={label}
     >
-      <Icon className="h-4.5 w-4.5" strokeWidth={2.5} />
+      <Icon className={STATUS_BADGE_ICON_SIZE} strokeWidth={STATUS_BADGE_STROKE_WIDTH} />
       {showLabel && <span className="text-xs font-medium">{label}</span>}
     </div>
   )

@@ -6,6 +6,7 @@ import { ItemStatus, Database } from '@/types/database'
 import { ItemCard } from '@/components/items/item-card'
 import { MasonryGrid, MasonryItem } from '@/components/items/masonry-grid'
 import { Loader2 } from 'lucide-react'
+import { LOADER_ICON_SIZE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -92,7 +93,7 @@ export function TagFeed({ tagId }: TagFeedProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className={`${LOADER_ICON_SIZE} animate-spin text-muted-foreground`} />
       </div>
     )
   }

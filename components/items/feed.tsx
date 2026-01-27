@@ -10,6 +10,7 @@ import { ListView } from './list-view'
 import { Loader2 } from 'lucide-react'
 import type { ViewMode } from './view-toggle'
 import { cn } from '@/lib/utils'
+import { LOADER_ICON_SIZE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -149,7 +150,7 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className={`${LOADER_ICON_SIZE} animate-spin text-muted-foreground`} />
       </div>
     )
   }
