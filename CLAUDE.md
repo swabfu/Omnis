@@ -42,6 +42,7 @@ npm run lint     # Run ESLint
 | Icon sizes | `lib/type-icons.tsx` | `NAV_ICON_SIZE`, `ACTION_ICON_SIZE`, `BADGE_ICON_SIZE`, `OVERLAY_ICON_SIZE`, `SMALL_ICON_SIZE`, `LABEL_ICON_SIZE`, `DROPDOWN_ICON_SIZE`, `LOADER_ICON_SIZE`, `LARGE_ICON_SIZE`, `SUCCESS_ICON_SIZE` |
 | Icon strokes | `lib/type-icons.tsx` | `NAV_ICON_STROKE_WIDTH`, `ACTION_ICON_STROKE_WIDTH`, etc. |
 | Type icons/colors | `lib/type-icons.tsx` | `typeIcons.link`, `typeColors.link` |
+| Type constants | `lib/type-icons.tsx` | `LINK_TYPE`, `TWEET_TYPE`, `IMAGE_TYPE`, `NOTE_TYPE` |
 | Status icons/colors | `lib/status-icons.tsx` | `statusIcons.inbox`, `statusColors.inbox`, `statusBadgeColors.done` |
 | Status constants | `lib/status-icons.tsx` | `INBOX_STATUS`, `DONE_STATUS`, `ARCHIVED_STATUS` |
 | Status component | `components/items/status-icon.tsx` | `<StatusIcon status="inbox" />` |

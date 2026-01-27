@@ -34,8 +34,13 @@ import {
   LABEL_ICON_SIZE,
   LABEL_ICON_STROKE_WIDTH,
   DROPDOWN_ICON_SIZE,
+  NOTE_TYPE,
+  TWEET_TYPE,
+  IMAGE_TYPE,
+  LINK_TYPE,
 } from '@/lib/type-icons'
 import { DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
+import { INBOX_STATUS, DONE_STATUS, ARCHIVED_STATUS } from '@/lib/status-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -113,7 +118,7 @@ export function ItemCard({
   }
 
   const renderContent = () => {
-    if (type === 'note') {
+    if (type === NOTE_TYPE) {
       return (
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="whitespace-pre-wrap">{content}</p>
@@ -121,14 +126,14 @@ export function ItemCard({
       )
     }
 
-    if (type === 'tweet' && url) {
+    if (type === TWEET_TYPE) && url) {
       const tweetId = url.match(/(twitter|x)\.com\/\w+\/status\/(\d+)/)?.[2]
       if (tweetId) {
         return <Tweet id={tweetId} />
       }
     }
 
-    if (type === 'link' || type === 'tweet') {
+    if (type === LINK_TYPE || type === TWEET_TYPE) {
       return (
         <a
           href={url || '#'}
@@ -149,7 +154,7 @@ export function ItemCard({
       )
     }
 
-    if (type === 'image' && image_path) {
+    if (type === IMAGE_TYPE) && image_path) {
       const { data: { publicUrl } } = supabase.storage
         .from('items')
         .getPublicUrl(image_path)
@@ -218,7 +223,7 @@ export function ItemCard({
             <div className="flex-1 min-w-0">
               {title && type !== 'tweet' ? (
                 <h3 className="font-medium text-sm truncate">
-                  {type === 'link' && url ? (
+                  {type === LINK_TYPE && url ? (
                     <a
                       href={url}
                       target="_blank"
@@ -257,19 +262,19 @@ export function ItemCard({
                   <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Edit
                 </DropdownMenuItem>
-                {status !== 'done' && (
+                {status !== DONE_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('done')}>
                     <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Mark as Done
                   </DropdownMenuItem>
                 )}
-                {status !== 'inbox' && (
+                {status !== INBOX_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
                     <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Move to Inbox
                   </DropdownMenuItem>
                 )}
-                {status !== 'archived' && (
+                {status !== ARCHIVED_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
                     <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Archive
@@ -314,19 +319,19 @@ export function ItemCard({
                   <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
                   Edit
                 </DropdownMenuItem>
-                {status !== 'done' && (
+                {status !== DONE_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('done')}>
                     <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Mark as Done
                   </DropdownMenuItem>
                 )}
-                {status !== 'inbox' && (
+                {status !== INBOX_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
                     <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Move to Inbox
                   </DropdownMenuItem>
                 )}
-                {status !== 'archived' && (
+                {status !== ARCHIVED_STATUS && (
                   <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
                     <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
                     Archive
@@ -343,7 +348,7 @@ export function ItemCard({
           {/* Title */}
           {title && type !== 'tweet' && (
             <h3 className="font-semibold mb-2 line-clamp-2">
-              {type === 'link' && url ? (
+              {type === LINK_TYPE && url ? (
                 <a
                   href={url}
                   target="_blank"

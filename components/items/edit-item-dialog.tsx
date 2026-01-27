@@ -16,7 +16,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ContentType, ItemStatus, Database } from '@/types/database'
 import { TagSelector } from './tag-selector'
 import { dispatchTagsUpdated } from '@/components/layout/sidebar'
-import { BADGE_ICON_SIZE } from '@/lib/type-icons'
+import { BADGE_ICON_SIZE, NOTE_TYPE, IMAGE_TYPE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -58,7 +58,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
       // Update the item
       const updateData: Partial<Database['public']['Tables']['items']['Update']> = {}
 
-      if (item.type === 'note') {
+      if (item.type === NOTE_TYPE) {
         updateData.content = content.trim()
         // Update title to first 100 chars of content if title is empty
         updateData.title = title || content.slice(0, 100) + (content.length > 100 ? '...' : '')
@@ -132,7 +132,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
 
   const renderForm = () => {
     // Note type
-    if (item.type === 'note') {
+    if (item.type === NOTE_TYPE) {
       return (
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
@@ -171,7 +171,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
     }
 
     // Image type (can only add tags)
-    if (item.type === 'image') {
+    if (item.type === IMAGE_TYPE) {
       return (
         <div className="space-y-4 mt-4">
           <p className="text-sm text-muted-foreground">Images can be tagged but not edited.</p>

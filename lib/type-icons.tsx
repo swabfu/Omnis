@@ -1,6 +1,12 @@
 import { LucideIcon, Inbox, Link2, Twitter, Image as ImageIcon, FileText } from 'lucide-react'
 import { ContentType } from '@/types/database'
 
+// Content type value constants - use instead of magic strings
+export const LINK_TYPE: ContentType = 'link'
+export const TWEET_TYPE: ContentType = 'tweet'
+export const IMAGE_TYPE: ContentType = 'image'
+export const NOTE_TYPE: ContentType = 'note'
+
 // Global icon styling constants - used across all nav items (types, tags, status)
 export const NAV_ICON_SIZE = 'h-5 w-5'
 export const NAV_ICON_STROKE_WIDTH = 2.5
