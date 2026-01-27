@@ -2,138 +2,96 @@
 
 Properly closes the current session by syncing documentation and committing changes.
 
+**Goal:** After running this command, the user can close the session knowing everything is properly finished.
+
+## Modes
+
+- `/byebye` - Runs automatically (tools are auto-approved in settings.local.json)
+- `/byebye ask` - Asks for permission before each major step
+
 ## Steps
 
-### 1. Review Session Changes
+### 1. Review Changes
 
-Check what was modified this session:
 ```bash
 git status
 git diff --stat
 ```
 
-### 2. Update CLAUDE.md
+### 2. Sync CLAUDE.md (add/change/delete)
 
-**Ask yourself:** Were any of these added/modified this session?
-- New shared constants, utilities, or modules
-- New component patterns
-- Architectural decisions
-- New routes, API endpoints, or database schema changes
-- Changes to existing documented patterns
+Update `CLAUDE.md` to reflect this session's changes:
+- **Add:** New patterns, constants, utilities, modules, routes, schema
+- **Change:** Modifications to existing documented patterns
+- **Delete:** Remove docs for removed/obsolete patterns
 
-If YES → Update the relevant section in `CLAUDE.md`
+**Checklist:**
+- New shared constants or utilities?
+- New component patterns?
+- Architectural decisions?
+- New routes, API endpoints, or database schema changes?
+- Any patterns removed from codebase?
 
-**Common sections to update:**
-- `Development Principles` - New patterns or workflows
-- `Quick Reference: Centralized Patterns` - New constants/utilities
-- `Architecture` - New routes, schema changes
-- `Type Icons & Colors` - New type/status additions
-- Component-specific sections
+### 3. Sync tasks.md (add/change/delete)
 
-### 3. Update tasks.md
-
-**For completed work:** Check `[x]` and add completion notes if needed
-**For in-progress work:** Add/update with current state
-**For new bugs found:** Add to appropriate section
-**For new ideas:** Add to `Nice-to-Have` or `Viability Questionable`
-
-**Session summary template** (append to bottom if needed):
-```markdown
----
-## Session Notes (YYYY-MM-DD)
-
-Completed:
-- [x] What was done
-
-In Progress:
-- [ ] What's pending
-
-Blockers:
-- Any issues encountered
-```
+Update `tasks.md` to track progress:
+- **Add:** New bugs, ideas, in-progress work
+- **Change:** Update status of existing tasks, add completion notes
+- **Delete:** Remove completed tasks if desired (optional)
 
 ### 4. Stage & Commit
 
-**Stage files:**
 ```bash
 git add CLAUDE.md tasks.md
-git add -A  # Stage all other changes
-```
-
-**Review staged changes:**
-```bash
+git add -A
 git diff --staged
+git commit -m "..."
 ```
 
-**Create commit:**
-```bash
-git commit -m "$(cat <<'EOF'
-Docs: [brief description of changes]
-
-- What changed in CLAUDE.md
-- What changed in tasks.md
-- Any other significant changes
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-EOF
-)"
-```
-
-### 5. Push to GitHub
+### 5. Push
 
 ```bash
 git push
 ```
 
-## Edge Cases
+## Ask Mode Permission Points
 
-### No changes to commit
-If `git status` shows nothing (except untracked files you don't want):
-- **Action:** Skip commit, just confirm no documentation updates needed
+When `/byebye ask` is used, prompt before:
 
-### Only documentation changes
-If only CLAUDE.md or tasks.md changed:
-- **Action:** Commit with `Docs:` prefix, no code changes needed
+1. **Updating CLAUDE.md** - "Update CLAUDE.md: [summary]?"
+2. **Updating tasks.md** - "Update tasks.md: [summary]?"
+3. **Staging files** - "Stage [files]?"
+4. **Committing** - "Commit: [message]?"
+5. **Pushing** - "Push to GitHub?"
 
-### Merge conflicts on push
-If `git push` fails:
-1. `git pull --rebase`
-2. Resolve conflicts if any
-3. `git push`
+## Edge Cases & Resolutions
 
-### Pre-commit hook fails
-If commit fails due to hooks:
-1. Read the error message
-2. Fix the issue (lint errors, etc.)
-3. Try commit again
+| Situation | Resolution | Session State |
+|-----------|------------|---------------|
+| No changes to commit | Confirm and close | ✅ Ready |
+| Only docs changed | Commit with `Docs:` prefix | ✅ Ready |
+| Push fails (conflict) | Notify: "Resolve manually, then run `/byebye` again" | ⏸️ NOT ready - user must resolve first |
+| Pre-commit hook fails | Show error, wait for fix | ⏸️ NOT ready - user must fix first |
+| Unsure what to update | Ask user what changes are needed | ⏸️ Awaiting input |
+| Only conversation | Update tasks.md if decisions made | ✅ Ready |
 
-### CLAUDE.md has conflicting updates
-If you're unsure what to update in CLAUDE.md:
-1. Ask the user: "What documentation updates are needed for this session?"
-2. Only add/update what the user confirms
-
-### Session was only conversation
-If no code was written, only discussion:
-- **Action:** Update tasks.md if any decisions were made, skip otherwise
+**Important:** Only confirm session close when state is ✅ Ready. If ⏸️, user must take action first.
 
 ## Pre-Exit Checklist
 
-Before confirming session close, verify:
+Before confirming session is ready to close:
 - [ ] `git status` reviewed
-- [ ] CLAUDE.md updated if new patterns/constants/routes/schema added
-- [ ] tasks.md updated with completed/in-progress work
+- [ ] CLAUDE.md synced (add/change/delete as needed)
+- [ ] tasks.md synced (add/change/delete as needed)
 - [ ] `git diff --staged` reviewed
-- [ ] Commit message is clear and descriptive
-- [ ] `git push` succeeded (or intentionally skipped)
+- [ ] Commit message is clear
+- [ ] `git push` succeeded
+- [ ] No blockers (conflicts, hook failures, etc.)
 
-## Usage
+## Final Output
 
-Call this command at the end of every session:
-```
-/byebye
-```
+End with one of:
 
-Then confirm:
-- "All changes committed and pushed. Session ready to close."
-- OR "No changes to commit. Session ready to close."
-- OR "Issue: [describe]. Awaiting resolution."
+- ✅ "All changes committed and pushed. **Session ready to close.**"
+- ✅ "No changes to commit. **Session ready to close.**"
+- ⏸️ "Issue: [describe]. **Session NOT ready** - please resolve, then run `/byebye` again."

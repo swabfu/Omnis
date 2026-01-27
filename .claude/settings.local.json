@@ -5,7 +5,18 @@
       "Bash(npm install @supabase/supabase-js @supabase/ssr lucide-react react-tweet date-fns next-themes)",
       "Bash(npx:*)",
       "Bash(npm run build)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Read(**.md)",
+      "Write(**.md)",
+      "Edit(**.md)"
     ]
   }
 }
