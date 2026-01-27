@@ -73,6 +73,16 @@ Prioritized backlog of improvements, bugs, and features.
   - [x] Type colors: green (links), sky blue (tweets), red (images), yellow (notes), neutral (all)
   - [x] Status colors: neutral (inbox), green (done), orange (archived)
   - [x] All icons maintain colors on active nav state
+- [x] **Development principles documentation** - Added "Think Globally, Never Hardcode" section to CLAUDE.md
+  - [x] 4-phase workflow (Search → Refactor → Implement → Verify)
+  - [x] Quick reference table for centralized patterns
+  - [x] Bad vs Good examples
+  - [x] Code review checklist
+  - [x] CLAUDE.md sync requirement for every session
+- [x] **Session close command** - Created `/byebye` command for proper session cleanup
+  - [x] Auto-sync CLAUDE.md and tasks.md
+  - [x] Commit and push workflow
+  - [x] Edge case handling
 - [ ] **Code review & simplification** - Debug, test, verify, and simplify codebase before delivery. ENSURE EDGE CASES ARE HANDLED ALWAYS
 - [ ] **Mobile touch targets** - Ensure all buttons are at least 44x44px on mobile
 - [ ] **Input font-size fix** - Set minimum 16px on mobile inputs to prevent iOS auto-zoom
