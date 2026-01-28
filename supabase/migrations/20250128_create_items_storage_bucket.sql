@@ -4,12 +4,13 @@
 -- 1. RLS policies restricting uploads/deletes to own folders
 -- 2. Hard-to-guess paths: {user_id}/images/{timestamp}.{ext}
 -- 3. user_id is a UUID, not guessable
+-- CORS uses wildcard "*" to allow any domain - safe because auth is required for uploads
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types, cors)
 VALUES ('items', 'items', true, 10485760,
   ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
   '[
     {
-      "origins": ["https://omnis-ashen.vercel.app"],
+      "origins": ["*"],
       "methods": ["GET", "PUT", "POST", "DELETE"],
       "headers": ["*"],
       "maxAge": 3600
