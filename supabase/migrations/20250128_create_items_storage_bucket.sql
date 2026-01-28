@@ -9,7 +9,7 @@ VALUES ('items', 'items', true, 10485760,
   ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
   '[
     {
-      "origins": ["*"],
+      "origins": ["https://omnis-ashen.vercel.app"],
       "methods": ["GET", "PUT", "POST", "DELETE"],
       "headers": ["*"],
       "maxAge": 3600
