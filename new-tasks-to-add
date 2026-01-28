@@ -1,4 +1,0 @@
-- Edit history (last modified at x time) on items not just when created
-- Ability for a user to delete their account from within app —> ensure it actually deletes everything from supabase but ONLY FROM THAT USER (make deletion multi step like github or vercel or supabase)
-- Folder and subfolder system also in the sidebar
-- item pin feature

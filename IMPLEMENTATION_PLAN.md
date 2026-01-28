@@ -13,7 +13,7 @@ Tasks are ordered to avoid duplicate work and respect dependencies.
 ## PHASE 1: Critical Bugs (fix these first - they block core functionality)
 
 - [x] **Image upload broken** - RLS error on localhost; fix Supabase policy or storage config
-- [ ] **Sign out broken** - Sign out button doesn't work; fix auth flow
+- [x] **Sign out broken** - Sign out button doesn't work; fix auth flow
 - [ ] **Password reset email error** - OTP expired redirect; fix reset flow
 - [ ] **Tag deletion not syncing** - Deleted tags still appear; fix event bus/dispatch
 - [ ] **Status page icon bug** - Wrong icon on "Move to inbox"; use global icon source

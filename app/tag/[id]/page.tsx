@@ -1,9 +1,8 @@
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
-import { redirect } from 'next/navigation'
+import { ClientFeed } from '@/components/items/client-feed'
 import { createClient } from '@/lib/supabase/server'
-import { Suspense } from 'react'
-import { TagFeed } from './tag-feed'
+import { redirect } from 'next/navigation'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -37,18 +36,7 @@ export default async function TagPage({ params }: Props) {
         <Header />
         <div className="flex-1 overflow-auto p-6">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-8">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">#</span>
-                <h1 className="text-3xl font-bold">{tag.name}</h1>
-              </div>
-              <p className="text-muted-foreground mt-1">
-                Items tagged with &ldquo;{tag.name}&rdquo;
-              </p>
-            </div>
-            <Suspense fallback={<div>Loading...</div>}>
-              <TagFeed tagId={id} />
-            </Suspense>
+            <ClientFeed initialTagId={id} initialTagName={tag.name} />
           </div>
         </div>
       </main>

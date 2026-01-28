@@ -177,6 +177,8 @@ createServerClient<Database>(...)
 
 **Migrations:** New schema changes require manual migration in Supabase SQL Editor (files in `supabase/migrations/`).
 
+**CRITICAL:** Every database change (new tables, RLS policies, storage buckets, functions) MUST be recorded in `supabase/migrations/`. Never run SQL in Supabase Editor without also updating the corresponding migration file. The migration files are the source of truth for the database schema.
+
 ## Detailed References
 
 See `docs/REFERENCES.md` for detailed documentation on:
@@ -196,6 +198,8 @@ Before spawning agents via Task tool, check the recommended model. Default to `s
 2. Assess task complexity
 3. Specify `model: "haiku|sonnet|opus"` in Task call
 
+**Agent Type:** Before defaulting to `Explore`, assess whether a specialized agent (`debugger`, `react-specialist`, `typescript-pro`, etc.) is better suited for the task.
+
 ## Code Review Checklist
 
 Before committing:
@@ -206,3 +210,4 @@ Before committing:
 - [ ] Server vs Client components used correctly (default Server)
 - [ ] New colors in `@theme inline`, not hardcoded
 - [ ] CLAUDE.md updated if patterns/constants/routes/schema changed
+- [ ] Migration file updated if any database changes were made

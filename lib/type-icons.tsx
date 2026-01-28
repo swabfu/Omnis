@@ -59,6 +59,9 @@ export const TAG_COLOR_PICKER_SIZE_LG = 'h-8 w-10'
 // Avatar placeholder size (for feed empty state)
 export const AVATAR_ICON_SIZE = 'h-20 w-20'
 
+// Button icon size (icons inside buttons, like "Load More")
+export const BUTTON_ICON_SIZE = 'h-4 w-4'
+
 // Sidebar logo size (Omnis logo in sidebar)
 export const SIDEBAR_LOGO_SIZE = 'h-8 w-8'
 export const SIDEBAR_LOGO_STROKE_WIDTH = 2
