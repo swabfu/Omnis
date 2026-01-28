@@ -116,6 +116,16 @@ Located in `supabase/schema.sql`. Key tables: `profiles`, `items` (`link`, `twee
 
 Items have status workflow: `inbox` → `done` → `archived`. Items store 1536-dim vector embedding for pgvector semantic search.
 
+### Storage
+
+**Items bucket:** `supabase/migrations/20250128_create_items_storage_bucket.sql`
+- Public bucket for image uploads (`items` bucket)
+- Path format: `{user_id}/images/{timestamp}.{ext}`
+- 10MB file size limit, image MIME types only
+- RLS policies restrict users to their own folder (upload/view/delete)
+- Use `getPublicUrl()` after upload to get display URL
+- Migration is idempotent (uses `ON CONFLICT DO UPDATE` and `DROP POLICY IF EXISTS`)
+
 ### Authentication
 
 Server-side Supabase SSR. Key files: `lib/supabase/client.ts` (browser), `lib/supabase/server.ts` (server), `lib/supabase/middleware.ts` (session refresh), `middleware.ts` (Next.js wrapper).

@@ -10,7 +10,8 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Core functionality that is broken or missing*
 
-- [ ] **Image upload broken** - Cannot upload images; RLS error: `failed to upload image, new row violates row-level security policy` on localhost
+- [x] **Image upload broken** - Cannot upload images; RLS error: `failed to upload image, new row violates row-level security policy` on localhost
+  - **Fixed:** Created items storage bucket with RLS policies; uploads work on localhost and Vercel
 - [ ] **Sign out broken** - Clicking sign out doesn't sign users out or redirect to launch screen
 - [ ] **Password reset email error** - Forgot password email redirects to `localhost:3000/?error=access_denied&error_code=otp_expired`
 - [ ] **Status page icon bug** - "Move to inbox" button in Done/Archived pages shows checkmark instead of inbox/tray icon; ensure global icon source
