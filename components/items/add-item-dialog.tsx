@@ -168,26 +168,49 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
     e.preventDefault()
     if (!imageFile || !user?.id) return
 
+    // Validate file size (10MB limit matching bucket policy)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+    if (imageFile.size > MAX_FILE_SIZE) {
+      alert('Image must be smaller than 10MB.')
+      return
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
+    if (!allowedTypes.includes(imageFile.type)) {
+      alert('Only PNG, JPEG, GIF, WebP, and SVG images are allowed.')
+      return
+    }
+
     setLoading(true)
 
     try {
       // Upload to Supabase Storage
       const fileExt = imageFile.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `images/${fileName}`
+      const filePath = `${user.id}/images/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('items')
         .upload(filePath, imageFile)
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        throw new Error(`Upload failed: ${uploadError.message}`)
+      }
 
-      const { data: item } = await supabase.from('items').insert({
+      const { data: item, error: insertError } = await supabase.from('items').insert({
         user_id: user.id,
         type: 'image',
         image_path: filePath,
         title: imageFile.name,
       }).select().single()
+
+      if (insertError) {
+        // Clean up uploaded file if database insert fails
+        await supabase.storage.from('items').remove([filePath])
+        throw new Error(`Failed to save image record: ${insertError.message}`)
+      }
 
       if (item && selectedTags.length > 0) {
         await createTagAssociations(item.id, selectedTags.map(t => t.id), supabase)
@@ -196,8 +219,10 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       resetForm()
       setOpen(false)
       onItemAdded?.()
-        } catch {
-      alert('Failed to upload image. Please try again.')
+        } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to upload image. Please try again.'
+      alert(message)
+      console.error('Image upload error:', err)
     } finally {
       setLoading(false)
     }
