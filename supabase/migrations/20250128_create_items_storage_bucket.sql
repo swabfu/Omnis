@@ -4,24 +4,12 @@
 -- 1. RLS policies restricting uploads/deletes to own folders
 -- 2. Hard-to-guess paths: {user_id}/images/{timestamp}.{ext}
 -- 3. user_id is a UUID, not guessable
--- CORS uses wildcard "*" to allow any domain - safe because auth is required for uploads
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types, cors)
-VALUES ('items', 'items', true, 10485760,
-  ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
-  '[
-    {
-      "origins": ["*"],
-      "methods": ["GET", "PUT", "POST", "DELETE"],
-      "headers": ["*"],
-      "maxAge": 3600
-    }
-  ]'::jsonb
-)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('items', 'items', true, 10485760, ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'])
 ON CONFLICT (id) DO UPDATE SET
   public = EXCLUDED.public,
   file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types,
-  cors = EXCLUDED.cors;
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- Drop existing policies if they exist (for idempotency)
 DROP POLICY IF EXISTS "Authenticated users can upload to items bucket" ON storage.objects;
