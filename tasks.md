@@ -2,7 +2,7 @@
 
 Prioritized backlog of improvements, bugs, and features.
 
-**Protocol:** When marking a task as `[x]`, move it to `completed-tasks.md` via Bash (never Read/Write that file — it's in `.claudeignore`).
+**Protocol:** When marking a task as `[x]`, move it to `.completed-tasks.md` via Bash (never Read/Write that file — it's hidden with dot prefix).
 
 ---
 
