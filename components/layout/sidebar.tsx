@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LogOut, Plus, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -61,6 +61,7 @@ export function dispatchTagsUpdated() {
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [tags, setTags] = useState<Tag[]>([])
   const [tagManagerOpen, setTagManagerOpen] = useState(false)
   const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
@@ -102,6 +103,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    router.push('/login')
   }
 
   const handleUpdateTag = async (tagId: string, updates: Partial<Tag>) => {

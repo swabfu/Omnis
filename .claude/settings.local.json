@@ -17,7 +17,9 @@
       "Read(**.md)",
       "Write(**.md)",
       "Edit(**.md)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(dir:*)",
+      "Bash(where:*)"
     ]
   }
 }

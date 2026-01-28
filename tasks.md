@@ -32,17 +32,10 @@ Prioritized backlog of improvements, bugs, and features.
     - `#tagname` → search by tag (already works)
     - `@type` → search by content type (`@link`, `@tweet`, `@image`, `@note`)
     - `!status` → search by status (`!inbox`, `!done`, `!archived`)
-- [ ] **Mobile adaptive shell** - Single app, two UI shells based on screen size (CSS media queries)
-  - Desktop (`md:`+): Keep existing Sidebar (left rail)
-  - Mobile (default): BottomNav with Home, Search, Content Types, Add (+), Tags, Status
-  - Fixed position, glassmorphism effect, iOS safe area support
-  - **Note:** Same codebase, same routes — just different navigation shells
-- [ ] **Add Item: Drawer on mobile** - Use shadcn/ui Drawer (vaul) for bottom sheet on mobile vs Dialog on desktop
 - [ ] **Sort entries** - By date (ascending/descending) and custom sort
 - [ ] **Item context menu** - Hamburger/three-dot menu on items to edit, delete, etc.
 - [ ] **Note titles** - Notes currently show chunk of content as title; need explicit title field (let it be optional tho)
 - [ ] **Recently deleted tab** - 7-day retention with restore/permanent delete options (individual or bulk)
-- [ ] **PWA Share Target** - Register `/share-target` endpoint to accept shared data from other apps
 - [ ] **Unified filter system** - All pages (type/status/tag) are same view with different filters applied; enable combining filters (e.g., filter by tag within archived, tag within content type)
   - Share global attributes/filters across pages; avoid per-page configuration
   - Essentially: one item list component that accepts filter params
@@ -76,35 +69,15 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Refactoring, cleanup, and quality assurance*
 
-- [ ] **Code review & simplification** - Debug, test, verify, and simplify codebase before delivery. ENSURE EDGE CASES ARE HANDLED ALWAYS
 - [ ] **Mobile touch targets** - Ensure all buttons are at least 44x44px on mobile
 - [ ] **Input font-size fix** - Set minimum 16px on mobile inputs to prevent iOS auto-zoom
-- [ ] **CLAUDE.md rewrite** - Expand "Think Globally" beyond UI: implementing new features, changes, fixes, design, architecture should all be EASY and follow global patterns
 - [ ] **Middleware rework** - Address caution messages; future-proof implementation (investigate and make judgment call)
-
----
-
-## Adaptive Shell Specifications
-
-**Single app, two navigation shells** — CSS media queries determine which shell renders. No separate mobile version.
-
-| Aspect | Desktop (`md:`+) | Mobile (default) |
-|--------|------------------|------------------|
-| Nav | Sidebar (left rail) | BottomNav (fixed bar) |
-| Add Item | Dialog (centered modal) | Drawer (bottom sheet) |
-| Touch targets | Standard | Min 44x44px |
-| Input font-size | Standard | Min 16px |
-
-**PWA Config:**
-- Display mode: `standalone`
-- Status bar: `black-translucent`
-- Icons: `apple-touch-icon` (180x180), `maskable` for Android
 
 ---
 
 ## Viability Questionable
 
-*Features requiring approval before implementation*
+*Don't work on these. They are just food for thought for the user; features requiring approval before implementation*
 
 - [ ] **URL preview/metadata fetching** - When pasting URLs in the Add Item dialog, title/description/image previews don't appear due to CORS restrictions.
   - **Implications:** Requires server-side API route to bypass CORS, which introduces: server load/computational cost, need for rate limiting (to prevent abuse), caching infrastructure (to avoid re-fetching same URLs), timeout handling, security concerns (malicious URLs)
