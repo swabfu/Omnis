@@ -1,7 +1,8 @@
 'use client'
 
 import { SearchInput } from '@/components/items/search-input'
-import { ViewToggle, type ViewMode } from '@/components/items/view-toggle'
+import { ViewToggle } from '@/components/items/view-toggle'
+import { type ViewMode } from '@/types/database'
 import type { ItemWithTags } from '@/components/items/feed'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'

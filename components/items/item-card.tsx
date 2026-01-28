@@ -1,46 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  MoreVertical,
-  ExternalLink,
-  Check,
-  Archive,
-  Trash2,
-  FileEdit,
-  Tag,
-} from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ContentType, ItemStatus, Database } from '@/types/database'
-import { Tweet } from 'react-tweet'
 import { createClient } from '@/lib/supabase/client'
 import { EditItemDialog } from './edit-item-dialog'
-import { StatusIcon } from './status-icon'
-import {
-  typeIcons,
-  typeColors,
-  BADGE_ICON_SIZE,
-  BADGE_ICON_STROKE_WIDTH,
-  SMALL_ICON_SIZE,
-  LABEL_ICON_SIZE,
-  LABEL_ICON_STROKE_WIDTH,
-  DROPDOWN_ICON_SIZE,
-  NOTE_TYPE,
-  TWEET_TYPE,
-  IMAGE_TYPE,
-  LINK_TYPE,
-} from '@/lib/type-icons'
-import { DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
-import { INBOX_STATUS, DONE_STATUS, ARCHIVED_STATUS } from '@/lib/status-icons'
+import { ItemCardActions } from './item-card-actions'
+import { ItemCardContent } from './item-card-content'
+import { ItemCardLabels } from './item-card-labels'
+import { TITLE_LINE_CLAMP, TEXT_MUTED } from '@/lib/text-style-constants'
+import { LINK_TYPE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -87,8 +59,6 @@ export function ItemCard({
   onItemUpdated,
   variant = 'card',
 }: ItemCardProps) {
-  const TypeIcon = typeIcons[type]
-  const typeColor = typeColors[type]
   const supabase = createClient()
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
@@ -117,96 +87,7 @@ export function ItemCard({
     }
   }
 
-  const renderContent = () => {
-    if (type === NOTE_TYPE) {
-      return (
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <p className="whitespace-pre-wrap">{content}</p>
-        </div>
-      )
-    }
-
-    if (type === TWEET_TYPE) && url) {
-      const tweetId = url.match(/(twitter|x)\.com\/\w+\/status\/(\d+)/)?.[2]
-      if (tweetId) {
-        return <Tweet id={tweetId} />
-      }
-    }
-
-    if (type === LINK_TYPE || type === TWEET_TYPE) {
-      return (
-        <a
-          href={url || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block group"
-        >
-          {description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-              {description}
-            </p>
-          )}
-          <div className="flex items-center text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-            <span className="truncate">{url}</span>
-            <ExternalLink className={SMALL_ICON_SIZE} />
-          </div>
-        </a>
-      )
-    }
-
-    if (type === IMAGE_TYPE) && image_path) {
-      const { data: { publicUrl } } = supabase.storage
-        .from('items')
-        .getPublicUrl(image_path)
-
-      return (
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={publicUrl}
-            alt={title || 'Image'}
-            className="object-cover w-full h-full"
-          />
-        </div>
-      )
-    }
-
-    return null
-  }
-
   const isList = variant === 'list'
-
-  // Consistent label rendering - all icons are h-4.5 w-4.5 (18px) with thick strokes
-  const renderLabels = () => (
-    <div className="flex items-center gap-2 flex-wrap">
-      {/* Type icon */}
-      <div
-        className={cn('flex items-center justify-center px-2 py-1 rounded-md', typeColor)}
-        title={type}
-      >
-        <TypeIcon className={LABEL_ICON_SIZE} strokeWidth={LABEL_ICON_STROKE_WIDTH} />
-      </div>
-
-      {/* Status icon */}
-      <StatusIcon status={status} />
-
-      {/* Tags */}
-      {tags.map((tag) => (
-        <div
-          key={tag.id}
-          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium"
-          style={{
-            backgroundColor: `${tag.color || DEFAULT_TAG_COLOR}15`,
-            color: `${tag.color || DEFAULT_TAG_COLOR}`,
-          }}
-          title={tag.name}
-        >
-          <Tag className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
-          <span>{tag.name}</span>
-        </div>
-      ))}
-    </div>
-  )
 
   // List view
   if (isList) {
@@ -216,7 +97,7 @@ export function ItemCard({
           <div className="flex items-center gap-3 px-3 py-2">
             {/* Labels */}
             <div className="flex-shrink-0">
-              {renderLabels()}
+              <ItemCardLabels type={type} status={status} tags={tags} />
             </div>
 
             {/* Title/content */}
@@ -224,14 +105,14 @@ export function ItemCard({
               {title && type !== 'tweet' ? (
                 <h3 className="font-medium text-sm truncate">
                   {type === LINK_TYPE && url ? (
-                    <a
+                    <Link
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-primary transition-colors"
                     >
                       {title}
-                    </a>
+                    </Link>
                   ) : (
                     title
                   )}
@@ -251,41 +132,13 @@ export function ItemCard({
             </time>
 
             {/* Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className={DROPDOWN_ICON_SIZE} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                  <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                  Edit
-                </DropdownMenuItem>
-                {status !== DONE_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('done')}>
-                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Mark as Done
-                  </DropdownMenuItem>
-                )}
-                {status !== INBOX_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
-                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Move to Inbox
-                  </DropdownMenuItem>
-                )}
-                {status !== ARCHIVED_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
-                    <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Archive
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                  <Trash2 className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ItemCardActions
+              status={status}
+              onEdit={() => setEditDialogOpen(true)}
+              onStatusChange={handleStatusChange}
+              onDelete={handleDelete}
+              variant="list"
+            />
           </div>
         </Card>
 
@@ -306,57 +159,28 @@ export function ItemCard({
         <CardContent className="p-4">
           {/* Header - labels and menu */}
           <div className="flex items-start justify-between mb-3">
-            {renderLabels()}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreVertical className={DROPDOWN_ICON_SIZE} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                  <FileEdit className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                  Edit
-                </DropdownMenuItem>
-                {status !== DONE_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('done')}>
-                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Mark as Done
-                  </DropdownMenuItem>
-                )}
-                {status !== INBOX_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('inbox')}>
-                    <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Move to Inbox
-                  </DropdownMenuItem>
-                )}
-                {status !== ARCHIVED_STATUS && (
-                  <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
-                    <Archive className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                    Archive
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                  <Trash2 className={`mr-2 ${BADGE_ICON_SIZE}`} />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ItemCardLabels type={type} status={status} tags={tags} />
+            <ItemCardActions
+              status={status}
+              onEdit={() => setEditDialogOpen(true)}
+              onStatusChange={handleStatusChange}
+              onDelete={handleDelete}
+              variant="card"
+            />
           </div>
 
           {/* Title */}
           {title && type !== 'tweet' && (
-            <h3 className="font-semibold mb-2 line-clamp-2">
+            <h3 className={cn('font-semibold mb-2', TITLE_LINE_CLAMP)}>
               {type === LINK_TYPE && url ? (
-                <a
+                <Link
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
                   {title}
-                </a>
+                </Link>
               ) : (
                 title
               )}
@@ -364,7 +188,13 @@ export function ItemCard({
           )}
 
           {/* Content */}
-          {renderContent()}
+          <ItemCardContent
+            type={type}
+            url={url}
+            description={description}
+            content={content}
+            image_path={image_path}
+          />
 
           {/* Footer - date */}
           <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">

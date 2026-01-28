@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Loader2, Tag as TagIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { createTagAssociations } from '@/lib/supabase/tags'
 import { fetchMetadata } from '@/lib/metadata'
 import { ContentType } from '@/types/database'
 import { useAuth } from '@/components/auth/auth-provider'
@@ -27,6 +28,8 @@ import {
   LARGE_ICON_SIZE,
   LARGE_ICON_STROKE_WIDTH,
 } from '@/lib/type-icons'
+import { TITLE_TRUNCATE_LENGTH, TRUNCATE_ELLIPSIS } from '@/lib/truncate-constants'
+import { METADATA_DEBOUNCE_DELAY } from '@/lib/timeout-constants'
 
 interface Tag {
   id: string
@@ -73,13 +76,13 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
           setTitle(metadata.title || '')
           setDescription(metadata.description || '')
           setMetadataFetched(true)
-        } catch (error) {
+            } catch {
           // Silently fail - user can manually enter title/description
         } finally {
           setFetching(false)
         }
       }
-    }, 500)
+    }, METADATA_DEBOUNCE_DELAY)
 
     return () => clearTimeout(debounceTimer)
   }, [url, metadataFetched])
@@ -119,20 +122,14 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       }).select().single()
 
       if (item && selectedTags.length > 0) {
-        // Associate tags with item
-        const tagAssociations = selectedTags.map(tag => ({
-          item_id: item.id,
-          tag_id: tag.id
-        }))
-        await supabase.from('item_tags').insert(tagAssociations)
+        await createTagAssociations(item.id, selectedTags.map(t => t.id), supabase)
       }
 
       // Reset and close
       resetForm()
       setOpen(false)
       onItemAdded?.()
-    } catch (error) {
-      console.error('Error adding item:', error)
+        } catch {
       alert('Failed to add item. Please try again.')
     } finally {
       setLoading(false)
@@ -150,22 +147,17 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
         user_id: user.id,
         type: 'note',
         content: content.trim(),
-        title: content.slice(0, 100) + (content.length > 100 ? '...' : ''),
+        title: content.slice(0, TITLE_TRUNCATE_LENGTH) + (content.length > TITLE_TRUNCATE_LENGTH ? TRUNCATE_ELLIPSIS : ''),
       }).select().single()
 
       if (item && selectedTags.length > 0) {
-        const tagAssociations = selectedTags.map(tag => ({
-          item_id: item.id,
-          tag_id: tag.id
-        }))
-        await supabase.from('item_tags').insert(tagAssociations)
+        await createTagAssociations(item.id, selectedTags.map(t => t.id), supabase)
       }
 
       resetForm()
       setOpen(false)
       onItemAdded?.()
-    } catch (error) {
-      console.error('Error adding note:', error)
+        } catch {
       alert('Failed to add note. Please try again.')
     } finally {
       setLoading(false)
@@ -198,18 +190,13 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       }).select().single()
 
       if (item && selectedTags.length > 0) {
-        const tagAssociations = selectedTags.map(tag => ({
-          item_id: item.id,
-          tag_id: tag.id
-        }))
-        await supabase.from('item_tags').insert(tagAssociations)
+        await createTagAssociations(item.id, selectedTags.map(t => t.id), supabase)
       }
 
       resetForm()
       setOpen(false)
       onItemAdded?.()
-    } catch (error) {
-      console.error('Error uploading image:', error)
+        } catch {
       alert('Failed to upload image. Please try again.')
     } finally {
       setLoading(false)

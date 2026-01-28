@@ -2,24 +2,20 @@
 
 Prioritized backlog of improvements, bugs, and features.
 
+**Protocol:** When marking a task as `[x]`, move it to `completed-tasks.md` via Bash (never Read/Write that file — it's in `.claudeignore`).
+
 ---
 
 ## Critical Bugs
 
 *Core functionality that is broken or missing*
 
-- [x] **Search doesn't work** - Search functionality is non-functional
-- [x] **Cannot edit entries** - No way to add tags or edit existing items after saving
-- [x] **Cannot tag entries before auto-save** - Some items automatically save before user can add tags
-- [x] **Tag management** - Create, edit, delete tags from sidebar
-  - [x] Replace "tag counter" in sidebar with a plus button that opens a dialog
-  - [x] Tag creation dialog includes: name input, color picker
-  - [x] Ability to delete tags from the sidebar (add a small X on each tag which brings up a dialog - deleting tags doesn't delete the items, just the tag)
-  - [x] Drag and drop to reorder tags in sidebar
-- [x] **Top-right buttons broken** - View toggle buttons in top right don't do anything
-  - [x] Added masonry/uniform/list view modes
-  - [x] Smooth transitions between views (fade/scale animation)
-  - [x] List view shows compact horizontal rows
+- [ ] **Image upload broken** - Cannot upload images; RLS error: `failed to upload image, new row violates row-level security policy` on localhost
+- [ ] **Sign out broken** - Clicking sign out doesn't sign users out or redirect to launch screen
+- [ ] **Password reset email error** - Forgot password email redirects to `localhost:3000/?error=access_denied&error_code=otp_expired`
+- [ ] **Status page icon bug** - "Move to inbox" button in Done/Archived pages shows checkmark instead of inbox/tray icon; ensure global icon source
+- [ ] **Status page titles wrong** - All status pages show "All Items" instead of correct title ("Inbox", "Done", "Archived")
+- [ ] **Tag deletion not syncing** - When creating then deleting a new tag in the Add Item dialog, the tag visually disappears from the dialog but still appears elsewhere in the app (sidebar, tag pages)
 
 ---
 
@@ -28,6 +24,7 @@ Prioritized backlog of improvements, bugs, and features.
 *Important user-facing functionality*
 
 - [ ] **Context-aware search** - Search within current context (type/status/tag) with special prefixes
+  - **BUG:** Currently only works on "All Items" page; implement globally (follow CLAUDE.md — use shared components, no per-page config)
   - **Local search by default:** When on `/type/links`, search only links. When on `/status/inbox`, search only inbox items.
   - **Smart placeholder:** Search bar shows context (e.g., "Search links..." on links page, "Search inbox..." on inbox page, "Search all items..." on home)
   - **Auto-prefix with escape hatch:** Clicking search auto-fills context prefix (e.g., `type:link `, `status:inbox `, `tag:design `) but user can backspace to remove for global search
@@ -41,12 +38,14 @@ Prioritized backlog of improvements, bugs, and features.
   - Fixed position, glassmorphism effect, iOS safe area support
   - **Note:** Same codebase, same routes — just different navigation shells
 - [ ] **Add Item: Drawer on mobile** - Use shadcn/ui Drawer (vaul) for bottom sheet on mobile vs Dialog on desktop
-- [ ] **Image upload** - Currently cannot upload images
 - [ ] **Sort entries** - By date (ascending/descending) and custom sort
 - [ ] **Item context menu** - Hamburger/three-dot menu on items to edit, delete, etc.
 - [ ] **Note titles** - Notes currently show chunk of content as title; need explicit title field (let it be optional tho)
 - [ ] **Recently deleted tab** - 7-day retention with restore/permanent delete options (individual or bulk)
 - [ ] **PWA Share Target** - Register `/share-target` endpoint to accept shared data from other apps
+- [ ] **Unified filter system** - All pages (type/status/tag) are same view with different filters applied; enable combining filters (e.g., filter by tag within archived, tag within content type)
+  - Share global attributes/filters across pages; avoid per-page configuration
+  - Essentially: one item list component that accepts filter params
 
 ---
 
@@ -60,6 +59,16 @@ Prioritized backlog of improvements, bugs, and features.
 - [ ] **Timestamp toggle** - Switch between "about x time ago" and exact timestamp display
 - [ ] **Timestamp hover tooltip** - Show alternate timestamp format on hover
 - [ ] **Date format preferences** - User choice: just date, date+time, just time, etc.
+- [ ] **Grid view item sizing** - Standardize sizes; items shouldn't expand to match largest item in row (wastes space, weird spacing)
+- [ ] **Item spacing** - Reduce/standardize space above icons and below timestamp
+- [ ] **Transition rendering bug** - Fix freeze during fade-out; make transition global across all pages
+- [ ] **Page subtitles** - Match content type ("All your [type], saved in one place"). Status: "Everything in your [status], organized". Tags: already correct, don't change. **Note:** Status page *titles* (not subtitles) tracked separately in Critical Bugs
+- [ ] **Sidebar resizing** - Allow user to resize sidebar width
+- [ ] **Tags reload on navigation** - Investigate why tags unload/reload when switching pages; fix if feasible. **Note:** Brief "No tags yet" flicker now visible during page transitions
+- [ ] **Add item button** - Fix cursor pointer behavior; improve color to match theme; ensure plus/text alignment follows global standards
+- [ ] **Item count display** - Replace right "Add Item" button with count of items on current page (follow design standards, globalize)
+- [ ] **Tag page title** - Remove blank space in "# [space] name" format
+- [ ] **Password validation UX** - Show all password requirement errors simultaneously, not one at a time
 
 ---
 
@@ -67,25 +76,11 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Refactoring, cleanup, and quality assurance*
 
-- [x] **Global icon/color framework** - Centralized all icon sizes, colors, and styling constants
-  - [x] Created `lib/type-icons.tsx` with NAV/ACTION/BADGE/OVERLAY icon constants
-  - [x] Created `lib/status-icons.tsx` with global status colors
-  - [x] Type colors: green (links), sky blue (tweets), red (images), yellow (notes), neutral (all)
-  - [x] Status colors: neutral (inbox), green (done), orange (archived)
-  - [x] All icons maintain colors on active nav state
-- [x] **Development principles documentation** - Added "Think Globally, Never Hardcode" section to CLAUDE.md
-  - [x] 4-phase workflow (Search → Refactor → Implement → Verify)
-  - [x] Quick reference table for centralized patterns
-  - [x] Bad vs Good examples
-  - [x] Code review checklist
-  - [x] CLAUDE.md sync requirement for every session
-- [x] **Session close command** - Created `/byebye` command for proper session cleanup
-  - [x] Auto-sync CLAUDE.md and tasks.md
-  - [x] Commit and push workflow
-  - [x] Edge case handling
 - [ ] **Code review & simplification** - Debug, test, verify, and simplify codebase before delivery. ENSURE EDGE CASES ARE HANDLED ALWAYS
 - [ ] **Mobile touch targets** - Ensure all buttons are at least 44x44px on mobile
 - [ ] **Input font-size fix** - Set minimum 16px on mobile inputs to prevent iOS auto-zoom
+- [ ] **CLAUDE.md rewrite** - Expand "Think Globally" beyond UI: implementing new features, changes, fixes, design, architecture should all be EASY and follow global patterns
+- [ ] **Middleware rework** - Address caution messages; future-proof implementation (investigate and make judgment call)
 
 ---
 

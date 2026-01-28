@@ -43,7 +43,7 @@ export default async function TagPage({ params }: Props) {
                 <h1 className="text-3xl font-bold">{tag.name}</h1>
               </div>
               <p className="text-muted-foreground mt-1">
-                Items tagged with "{tag.name}"
+                Items tagged with &ldquo;{tag.name}&rdquo;
               </p>
             </div>
             <Suspense fallback={<div>Loading...</div>}>

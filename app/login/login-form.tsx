@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -15,17 +15,9 @@ export function LoginForm() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showSuccess, setShowSuccess] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
-
-  useEffect(() => {
-    if (searchParams?.get('signup') === 'success') {
-      setShowSuccess(true)
-      setTimeout(() => setShowSuccess(false), 5000)
-    }
-  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,7 +53,7 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showSuccess && (
+          {searchParams?.get('signup') === 'success' && (
             <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
               <CheckCircle className={BADGE_ICON_SIZE} />
               Account created! Please sign in below.

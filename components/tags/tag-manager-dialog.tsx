@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { deleteTagWithAssociations, getNextSortOrder } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -30,8 +32,12 @@ import {
   BADGE_ICON_STROKE_WIDTH,
   ACTION_ICON_SIZE,
   ACTION_ICON_STROKE_WIDTH,
+  TAG_COLOR_BUTTON_SIZE,
+  TAG_COLOR_PICKER_SIZE_LG,
+  ICON_BUTTON_SIZE_MD,
 } from '@/lib/type-icons'
-import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR, TAG_BADGE_OPACITY, TAG_BORDER_OPACITY } from '@/lib/tag-colors'
+import { ICON_HIDE_OPACITY, HOVER_SHOW_OPACITY, OPACITY_TRANSITION } from '@/lib/opacity-constants'
 
 type Tag = Database['public']['Tables']['tags']['Row']
 
@@ -53,13 +59,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
   const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (open) {
-      fetchTags()
-    }
-  }, [open])
-
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     if (!user?.id) return
 
     const { data } = await supabase
@@ -71,7 +71,13 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
     if (data) {
       setTags(data)
     }
-  }
+  }, [supabase, user?.id])
+
+  useEffect(() => {
+    if (open) {
+      fetchTags()
+    }
+  }, [open, fetchTags])
 
   const handleCreateTag = async () => {
     if (!newTagName.trim() || !user?.id) return
@@ -93,16 +99,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
         return
       }
 
-      // Get the current max sort_order for this user
-      const { data: maxOrder } = await supabase
-        .from('tags')
-        .select('sort_order')
-        .eq('user_id', user.id)
-        .order('sort_order', { ascending: false })
-        .limit(1)
-        .single()
-
-      const nextSortOrder = (maxOrder?.sort_order ?? -1) + 1
+      const nextSortOrder = await getNextSortOrder(user.id, supabase)
 
       const { data: newTag, error } = await supabase
         .from('tags')
@@ -123,8 +120,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
         setSelectedColor(DEFAULT_TAG_COLOR)
         onTagCreated?.()
       }
-    } catch (error) {
-      console.error('Error creating tag:', error)
+        } catch {
       alert('Failed to create tag. Please try again.')
     } finally {
       setLoading(false)
@@ -141,33 +137,18 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
 
     setDeletingTagId(tagToDelete.id)
 
-    try {
-      // First, remove all associations with items
-      const { error: associationError } = await supabase
-        .from('item_tags')
-        .delete()
-        .eq('tag_id', tagToDelete.id)
+    const { success, error } = await deleteTagWithAssociations(tagToDelete.id, supabase)
 
-      if (associationError) throw associationError
-
-      // Then delete the tag itself
-      const { error: deleteError } = await supabase
-        .from('tags')
-        .delete()
-        .eq('id', tagToDelete.id)
-
-      if (deleteError) throw deleteError
-
+    if (success) {
       setTags(tags.filter(t => t.id !== tagToDelete.id))
       setDeleteDialogOpen(false)
       setTagToDelete(null)
       onTagDeleted?.()
-    } catch (error) {
-      console.error('Error deleting tag:', error)
-      alert('Failed to delete tag. Please try again.')
-    } finally {
-      setDeletingTagId(null)
+    } else {
+      alert(error || 'Failed to delete tag. Please try again.')
     }
+
+    setDeletingTagId(null)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -192,7 +173,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
             {/* Create New Tag Section */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Tag className={BADGE_ICON_SIZE} text-muted-foreground strokeWidth={BADGE_ICON_STROKE_WIDTH} />
+                <Tag className={cn(BADGE_ICON_SIZE, 'text-muted-foreground')} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 <span className="text-sm font-medium">Create New Tag</span>
               </div>
 
@@ -213,7 +194,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       key={color}
                       type="button"
                       onClick={() => setSelectedColor(color)}
-                      className="h-6 w-6 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      className={cn(TAG_COLOR_BUTTON_SIZE, 'rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2')}
                       style={{
                         backgroundColor: color,
                         borderColor: selectedColor === color ? 'hsl(var(--background))' : color,
@@ -221,7 +202,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       }}
                     >
                       {selectedColor === color && (
-                        <Check className={ACTION_ICON_SIZE} mx-auto strokeWidth={ACTION_ICON_STROKE_WIDTH} style={{ color: 'white' }} />
+                        <Check className={cn(ACTION_ICON_SIZE, 'mx-auto')} strokeWidth={ACTION_ICON_STROKE_WIDTH} style={{ color: 'white' }} />
                       )}
                     </button>
                   ))}
@@ -232,7 +213,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                     type="color"
                     value={selectedColor}
                     onChange={(e) => setSelectedColor(e.target.value)}
-                    className="h-8 w-10 cursor-pointer rounded border"
+                    className={cn(TAG_COLOR_PICKER_SIZE_LG, 'cursor-pointer rounded border')}
                   />
                   <Input
                     type="text"
@@ -251,9 +232,9 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                   <span
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                     style={{
-                      backgroundColor: `${selectedColor}20`,
+                      backgroundColor: `${selectedColor}${TAG_BADGE_OPACITY}`,
                       color: selectedColor,
-                      border: `1px solid ${selectedColor}40`,
+                      border: `1px solid ${selectedColor}${TAG_BORDER_OPACITY}`,
                     }}
                   >
                     <Tag className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
@@ -301,7 +282,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className={cn(ICON_BUTTON_SIZE_MD, 'p-0', ICON_HIDE_OPACITY, HOVER_SHOW_OPACITY, OPACITY_TRANSITION)}
                         onClick={() => handleDeleteClick(tag)}
                         disabled={deletingTagId === tag.id}
                       >
@@ -332,7 +313,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Tag</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>"{tagToDelete?.name}"</strong>?
+              Are you sure you want to delete <strong>&ldquo;{tagToDelete?.name}&rdquo;</strong>?
               This will remove the tag from all items, but the items themselves will not be deleted.
               This action cannot be undone.
             </AlertDialogDescription>

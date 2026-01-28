@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { ContentType, ItemStatus, Database } from '@/types/database'
+import { Database } from '@/types/database'
 import { BADGE_ICON_SIZE } from '@/lib/type-icons'
+import { SEARCH_RESULTS_LIMIT, SEARCH_DEBOUNCE_MS } from '@/lib/search-constants'
 
 type Item = Database['public']['Tables']['items']['Row']
 
 interface Tag {
   id: string
   name: string
-  color?: string
+  color: string
 }
 
 interface ItemWithTags extends Item {
@@ -44,7 +45,7 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
           `)
           .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%,url.ilike.%${query}%`)
           .order('created_at', { ascending: false })
-          .limit(50)
+          .limit(SEARCH_RESULTS_LIMIT)
 
         if (data) {
           onResults((data || []) as ItemWithTags[])
@@ -52,10 +53,10 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
       } else {
         onClear()
       }
-    }, 300)
+    }, SEARCH_DEBOUNCE_MS)
 
     return () => clearTimeout(searchTimeout)
-  }, [query, onResults, onClear])
+  }, [query, onResults, onClear, supabase])
 
   const handleTagSearch = async (tagName: string) => {
     const { data } = await supabase
@@ -71,12 +72,12 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
       .order('created_at', { ascending: false })
 
     if (data) {
-      const filtered = (data || []).filter((item: any) =>
-        item.tags?.some((tag: any) =>
-          typeof tag === 'object' && 'name' in tag && tag.name.toLowerCase() === tagName.toLowerCase()
+      const filtered = (data || []).filter((item: ItemWithTags) =>
+        item.tags?.some((tag: Tag) =>
+          tag.name.toLowerCase() === tagName.toLowerCase()
         )
       )
-      onResults(filtered as ItemWithTags[])
+      onResults(filtered)
     }
   }
 

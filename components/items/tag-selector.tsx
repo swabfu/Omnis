@@ -1,15 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getNextSortOrder } from '@/lib/supabase/tags'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { X, Plus, Palette } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-provider'
-import { ACTION_ICON_SIZE, ACTION_ICON_STROKE_WIDTH } from '@/lib/type-icons'
-import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
+import { cn } from '@/lib/utils'
+import {
+  ACTION_ICON_SIZE,
+  ACTION_ICON_STROKE_WIDTH,
+  TAG_COLOR_BUTTON_SIZE,
+  TAG_COLOR_PICKER_SIZE,
+  ICON_BUTTON_SIZE_SM,
+} from '@/lib/type-icons'
+import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR, TAG_BADGE_OPACITY, TAG_BORDER_OPACITY, TAG_OUTLINE_BORDER_OPACITY } from '@/lib/tag-colors'
+import { TAG_SELECTOR_UNSELECTED_LIMIT } from '@/lib/sidebar-constants'
 
 interface Tag {
   id: string
@@ -20,11 +29,10 @@ interface Tag {
 interface TagSelectorProps {
   selectedTags: Tag[]
   onTagsChange: (tags: Tag[]) => void
-  itemId?: string
   onTagCreated?: () => void
 }
 
-export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }: TagSelectorProps) {
+export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSelectorProps) {
   const { user } = useAuth()
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [newTagName, setNewTagName] = useState('')
@@ -33,13 +41,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
   const [showColorPicker, setShowColorPicker] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchTags()
-    }
-  }, [user?.id])
-
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     if (!user?.id) return
 
     const { data } = await supabase
@@ -51,7 +53,12 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
     if (data) {
       setAllTags(data)
     }
-  }
+  }, [supabase, user])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid effect usage
+    fetchTags()
+  }, [fetchTags])
 
   const handleCreateTag = async () => {
     if (!newTagName.trim() || !user?.id) return
@@ -65,19 +72,9 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
       // Add existing tag if not already selected
       if (!selectedTags.find(t => t.id === existingTag.id)) {
         onTagsChange([...selectedTags, existingTag])
-        console.log('Added existing tag:', existingTag)
       }
     } else {
-      // Get the current max sort_order for this user
-      const { data: maxOrder } = await supabase
-        .from('tags')
-        .select('sort_order')
-        .eq('user_id', user.id)
-        .order('sort_order', { ascending: false })
-        .limit(1)
-        .single()
-
-      const nextSortOrder = (maxOrder?.sort_order ?? -1) + 1
+      const nextSortOrder = await getNextSortOrder(user.id, supabase)
 
       // Create new tag with selected color and sort_order
       const { data: newTag, error: insertError } = await supabase
@@ -92,7 +89,6 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
         .single()
 
       if (insertError) {
-        console.error('Error creating tag:', insertError)
         alert('Failed to create tag. Please try again.')
         return
       }
@@ -101,7 +97,6 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
         setAllTags([...allTags, newTag])
         onTagsChange([...selectedTags, newTag])
         onTagCreated?.()
-        console.log('Created and added new tag:', newTag)
       }
     }
 
@@ -137,8 +132,8 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
               variant="secondary"
               className="gap-1 pl-2"
               style={{
-                backgroundColor: `${tag.color || DEFAULT_TAG_COLOR}20`,
-                borderColor: `${tag.color || DEFAULT_TAG_COLOR}40`,
+                backgroundColor: `${tag.color || DEFAULT_TAG_COLOR}${TAG_BADGE_OPACITY}`,
+                borderColor: `${tag.color || DEFAULT_TAG_COLOR}${TAG_BORDER_OPACITY}`,
                 color: tag.color || DEFAULT_TAG_COLOR,
               }}
             >
@@ -180,7 +175,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                    className={cn(ICON_BUTTON_SIZE_SM, 'rounded-full border-2 transition-transform hover:scale-110')}
                     style={{ backgroundColor: selectedColor, borderColor: selectedColor }}
                   />
                 </PopoverTrigger>
@@ -196,7 +191,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                             setSelectedColor(color)
                             setShowColorPicker(false)
                           }}
-                          className="h-5 w-5 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          className={cn(TAG_COLOR_BUTTON_SIZE, 'rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2')}
                           style={{
                             backgroundColor: color,
                             borderColor: selectedColor === color ? 'hsl(var(--background))' : 'transparent',
@@ -210,7 +205,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
                         type="color"
                         value={selectedColor}
                         onChange={(e) => setSelectedColor(e.target.value)}
-                        className="h-6 w-8 cursor-pointer rounded border"
+                        className={cn(TAG_COLOR_PICKER_SIZE, 'cursor-pointer rounded border')}
                       />
                       <Input
                         type="text"
@@ -226,7 +221,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
               <span
                 className="text-xs px-2 py-0.5 rounded"
                 style={{
-                  backgroundColor: `${selectedColor}20`,
+                  backgroundColor: `${selectedColor}${TAG_BADGE_OPACITY}`,
                   color: selectedColor,
                 }}
               >
@@ -240,13 +235,13 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {unselectedTags.slice(0, 5).map(tag => (
+          {unselectedTags.slice(0, TAG_SELECTOR_UNSELECTED_LIMIT).map(tag => (
             <Badge
               key={tag.id}
               variant="outline"
               className="cursor-pointer hover:bg-accent"
               style={{
-                borderColor: `${tag.color || DEFAULT_TAG_COLOR}60`,
+                borderColor: `${tag.color || DEFAULT_TAG_COLOR}${TAG_OUTLINE_BORDER_OPACITY}`,
                 color: tag.color || DEFAULT_TAG_COLOR,
               }}
               onClick={() => handleToggleTag(tag)}
@@ -260,7 +255,7 @@ export function TagSelector({ selectedTags, onTagsChange, itemId, onTagCreated }
             className="h-6 px-2 text-xs"
             onClick={() => setShowInput(true)}
           >
-            <Plus className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} mr-1 />
+            <Plus className={cn(ACTION_ICON_SIZE, 'mr-1')} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
             New Tag
           </Button>
         </div>

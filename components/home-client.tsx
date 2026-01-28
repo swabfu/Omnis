@@ -4,8 +4,7 @@ import { useState, useCallback } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { ClientFeed } from '@/components/items/client-feed'
-import { ContentType, ItemStatus, Database } from '@/types/database'
-import type { ViewMode } from '@/components/items/view-toggle'
+import { ContentType, ItemStatus, Database, ViewMode } from '@/types/database'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -60,7 +59,6 @@ export function HomeClient({ initialType, initialStatus }: HomeClientProps) {
               initialStatus={initialStatus}
               searchResults={searchResults}
               view={view}
-              onViewChange={handleViewChange}
             />
           </div>
         </div>

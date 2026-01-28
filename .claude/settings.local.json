@@ -16,7 +16,8 @@
       "Bash(git push:*)",
       "Read(**.md)",
       "Write(**.md)",
-      "Edit(**.md)"
+      "Edit(**.md)",
+      "Bash(grep:*)"
     ]
   }
 }

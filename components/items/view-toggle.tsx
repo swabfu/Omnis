@@ -4,8 +4,7 @@ import { LayoutGrid, LayoutList, Columns } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BADGE_ICON_SIZE } from '@/lib/type-icons'
-
-export type ViewMode = 'masonry' | 'uniform' | 'list'
+import { type ViewMode } from '@/types/database'
 
 interface ViewToggleProps {
   view: ViewMode

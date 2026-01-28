@@ -6,7 +6,7 @@ import { Database } from '@/types/database'
 const publicRoutes = ['/login', '/signup', '/reset-password', '/update-password', '/auth/callback']
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  const supabaseResponse = NextResponse.next({
     request,
   })
 

@@ -8,6 +8,7 @@ export type Json =
 
 export type ContentType = 'link' | 'tweet' | 'image' | 'note'
 export type ItemStatus = 'inbox' | 'done' | 'archived'
+export type ViewMode = 'masonry' | 'uniform' | 'list'
 
 export interface Database {
   public: {

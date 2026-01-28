@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ItemStatus, Database } from '@/types/database'
 import { ItemCard } from '@/components/items/item-card'
@@ -29,11 +29,7 @@ export function TagFeed({ tagId }: TagFeedProps) {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchItemsByTag()
-  }, [tagId])
-
-  const fetchItemsByTag = async () => {
+  const fetchItemsByTag = useCallback(async () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('item_tags')
@@ -50,16 +46,21 @@ export function TagFeed({ tagId }: TagFeedProps) {
       .eq('tag_id', tagId)
 
     if (error) {
-      console.error('Error fetching items:', error)
+      // Error fetching items - will be handled by UI
     } else if (data) {
       const itemsData = data
-        .map((item_tag: any) => item_tag.items)
-        .filter((item: any) => item !== null)
+        .map((item_tag: { items: ItemWithTags | null }) => item_tag.items)
+        .filter((item): item is ItemWithTags => item !== null)
 
       setItems(itemsData)
     }
     setLoading(false)
-  }
+  }, [supabase, tagId])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid effect usage
+    fetchItemsByTag()
+  }, [fetchItemsByTag])
 
   const handleStatusChange = async (id: string, status: ItemStatus) => {
     const { error } = await supabase

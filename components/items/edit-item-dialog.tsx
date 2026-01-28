@@ -13,10 +13,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Tag as TagIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { ContentType, ItemStatus, Database } from '@/types/database'
+import { createTagAssociations } from '@/lib/supabase/tags'
+import { Database } from '@/types/database'
 import { TagSelector } from './tag-selector'
 import { dispatchTagsUpdated } from '@/components/layout/sidebar'
 import { BADGE_ICON_SIZE, NOTE_TYPE, IMAGE_TYPE } from '@/lib/type-icons'
+import { TITLE_TRUNCATE_LENGTH, TRUNCATE_ELLIPSIS } from '@/lib/truncate-constants'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -60,8 +62,8 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
 
       if (item.type === NOTE_TYPE) {
         updateData.content = content.trim()
-        // Update title to first 100 chars of content if title is empty
-        updateData.title = title || content.slice(0, 100) + (content.length > 100 ? '...' : '')
+        // Update title to first N chars of content if title is empty
+        updateData.title = title || content.slice(0, TITLE_TRUNCATE_LENGTH) + (content.length > TITLE_TRUNCATE_LENGTH ? TRUNCATE_ELLIPSIS : '')
       } else {
         if (title !== (item.title || '')) updateData.title = title || null
         if (description !== (item.description || '')) updateData.description = description || null
@@ -92,8 +94,6 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
       // Tags to add (in new but not in current)
       const toAdd = newTagIds.filter(id => !currentTagIds.includes(id))
 
-      console.log('Tag update:', { currentTagIds, newTagIds, toRemove, toAdd, selectedTags })
-
       // Remove old associations
       if (toRemove.length > 0) {
         const { error: removeError } = await supabase
@@ -102,28 +102,21 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
           .eq('item_id', item.id)
           .in('tag_id', toRemove)
         if (removeError) {
-          console.error('Error removing tags:', removeError)
           throw removeError
         }
       }
 
       // Add new associations
       if (toAdd.length > 0) {
-        const tagAssociations = toAdd.map(tagId => ({
-          item_id: item.id,
-          tag_id: tagId
-        }))
-        const { error: insertError } = await supabase.from('item_tags').insert(tagAssociations)
-        if (insertError) {
-          console.error('Error adding tags:', insertError)
-          throw insertError
+        const { success, error } = await createTagAssociations(item.id, toAdd, supabase)
+        if (!success) {
+          throw new Error(error)
         }
       }
 
       onOpenChange(false)
       onItemUpdated()
-    } catch (error) {
-      console.error('Error updating item:', error)
+        } catch {
       alert('Failed to update item. Please try again.')
     } finally {
       setLoading(false)
@@ -242,7 +235,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
         <DialogHeader>
           <DialogTitle>Edit {item.type}</DialogTitle>
           <DialogDescription>
-            Update this item's details and tags.
+            Update this item&apos;s details and tags.
           </DialogDescription>
         </DialogHeader>
 

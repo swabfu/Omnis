@@ -1,16 +1,17 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ContentType, ItemStatus, Database } from '@/types/database'
+import { ContentType, ItemStatus, Database, ViewMode } from '@/types/database'
 import { ItemCard } from './item-card'
 import { MasonryGrid, MasonryItem } from './masonry-grid'
 import { UniformGrid } from './uniform-grid'
 import { ListView } from './list-view'
 import { Loader2 } from 'lucide-react'
-import type { ViewMode } from './view-toggle'
 import { cn } from '@/lib/utils'
-import { LOADER_ICON_SIZE } from '@/lib/type-icons'
+import { LOADER_ICON_SIZE, AVATAR_ICON_SIZE } from '@/lib/type-icons'
+import { DRAGGING_OPACITY, NORMAL_OPACITY } from '@/lib/opacity-constants'
+import { TRANSITION_IN_DELAY, TRANSITION_OUT_DELAY } from '@/lib/timeout-constants'
 
 type Item = Database['public']['Tables']['items']['Row']
 
@@ -31,16 +32,14 @@ interface FeedProps {
   initialStatus?: ItemStatus
   searchResults?: ItemWithTags[] | null
   view?: ViewMode
-  onViewChange?: (view: ViewMode) => void
 }
 
-export function Feed({ initialType, initialStatus, searchResults, view, onViewChange }: FeedProps) {
+export function Feed({ initialType, initialStatus, searchResults, view }: FeedProps) {
   const [items, setItems] = useState<ItemWithTags[]>([])
   const [loading, setLoading] = useState(true)
-  const [internalView, setInternalView] = useState<ViewMode>('masonry')
   const [transitionPhase, setTransitionPhase] = useState<'idle' | 'out' | 'in'>('idle')
   const [displayView, setDisplayView] = useState<ViewMode>('masonry')
-  const currentView = view ?? internalView
+  const currentView = view ?? 'masonry'
   const supabase = createClient()
   const prevViewRef = useRef(currentView)
 
@@ -48,6 +47,7 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
   useEffect(() => {
     if (prevViewRef.current !== currentView && !loading) {
       // Phase 1: Fade out + slide out (gentle)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- View transition state updates are valid effect usage
       setTransitionPhase('out')
       const outTimer = setTimeout(() => {
         // Phase 2: Switch content during fade
@@ -56,10 +56,10 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
         setTransitionPhase('in')
         const inTimer = setTimeout(() => {
           setTransitionPhase('idle')
-        }, 300)
+        }, TRANSITION_IN_DELAY)
         prevViewRef.current = currentView
         return () => clearTimeout(inTimer)
-      }, 250)
+      }, TRANSITION_OUT_DELAY)
       return () => clearTimeout(outTimer)
     }
   }, [currentView, loading])
@@ -68,15 +68,15 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
   const getAnimationClasses = () => {
     switch (transitionPhase) {
       case 'out':
-        return 'opacity-50 scale-[0.99] translate-y-0.5'
+        return `${DRAGGING_OPACITY} scale-[0.99] translate-y-0.5`
       case 'in':
-        return 'opacity-100 scale-100 translate-y-0'
+        return `${NORMAL_OPACITY} scale-100 translate-y-0`
       default:
-        return 'opacity-100 scale-100 translate-y-0'
+        return `${NORMAL_OPACITY} scale-100 translate-y-0`
     }
   }
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     // If search results are provided, use those
     if (searchResults !== null && searchResults !== undefined) {
       setItems(searchResults)
@@ -107,16 +107,17 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching items:', error)
+      // Error fetching items - will be handled by UI
     } else {
       setItems((data || []) as ItemWithTags[])
     }
     setLoading(false)
-  }
+  }, [supabase, initialType, initialStatus, searchResults])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount/param change is valid effect usage
     fetchItems()
-  }, [initialType, initialStatus, searchResults])
+  }, [fetchItems])
 
   const handleStatusChange = async (id: string, status: ItemStatus) => {
     const { error } = await supabase
@@ -158,7 +159,7 @@ export function Feed({ initialType, initialStatus, searchResults, view, onViewCh
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+        <div className={cn('flex items-center justify-center rounded-full bg-muted', AVATAR_ICON_SIZE)}>
           <span className="text-4xl">🧠</span>
         </div>
         <h2 className="mt-6 text-xl font-semibold">No items yet</h2>

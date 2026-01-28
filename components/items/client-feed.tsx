@@ -3,19 +3,17 @@
 import { useState } from 'react'
 import { Feed } from './feed'
 import { AddItemDialog } from './add-item-dialog'
-import { ContentType, ItemStatus } from '@/types/database'
+import { ContentType, ItemStatus, ViewMode } from '@/types/database'
 import type { ItemWithTags } from './feed'
-import type { ViewMode } from './view-toggle'
 
 interface ClientFeedProps {
   initialType?: ContentType
   initialStatus?: ItemStatus
   searchResults?: ItemWithTags[] | null
   view?: ViewMode
-  onViewChange?: (view: ViewMode) => void
 }
 
-export function ClientFeed({ initialType, initialStatus, searchResults, view, onViewChange }: ClientFeedProps) {
+export function ClientFeed({ initialType, initialStatus, searchResults, view }: ClientFeedProps) {
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleItemAdded = () => {
@@ -41,7 +39,6 @@ export function ClientFeed({ initialType, initialStatus, searchResults, view, on
         initialStatus={initialStatus}
         searchResults={searchResults}
         view={view}
-        onViewChange={onViewChange}
       />
     </>
   )

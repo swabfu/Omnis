@@ -61,7 +61,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     } else {
       throw new Error('Failed to save')
     }
-  } catch (error) {
+    } catch {
     message.textContent = 'Error: Could not save. Make sure Omnis is running.'
     message.className = 'message error'
     saveBtn.disabled = false

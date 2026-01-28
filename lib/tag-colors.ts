@@ -13,3 +13,9 @@ export const DEFAULT_TAG_COLOR = '#3b82f6'
 // 15% opacity = "15", 40% opacity = "40"
 export const TAG_BG_OPACITY = '15'
 export const TAG_BORDER_OPACITY = '40'
+
+// Badge opacity (for selected tag badges - slightly more transparent)
+export const TAG_BADGE_OPACITY = '20'
+
+// Outline border opacity (for unselected tag badges - more visible)
+export const TAG_OUTLINE_BORDER_OPACITY = '60'

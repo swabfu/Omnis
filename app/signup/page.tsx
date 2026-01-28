@@ -50,9 +50,7 @@ export default function SignupPage() {
       return
     }
 
-    console.log('Attempting signup with:', email)
-
-    const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -60,10 +58,8 @@ export default function SignupPage() {
     setLoading(false)
 
     if (error) {
-      console.error('Signup error:', error)
       setError(error.message)
     } else {
-      console.log('Signup success:', data)
 
       // Account created! Now sign them in
       const { error: signInError } = await supabase.auth.signInWithPassword({

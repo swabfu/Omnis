@@ -46,6 +46,23 @@ export const SUCCESS_ICON_STROKE_WIDTH = 2.5
 export const LARGE_ICON_SIZE = 'h-10 w-10'
 export const LARGE_ICON_STROKE_WIDTH = 2
 
+// Icon button sizes (buttons with icons inside)
+export const ICON_BUTTON_SIZE_SM = 'h-6 w-6'
+export const ICON_BUTTON_SIZE_MD = 'h-7 w-7'
+export const ICON_BUTTON_SIZE_LG = 'h-8 w-8'
+
+// Tag color picker button sizes
+export const TAG_COLOR_BUTTON_SIZE = 'h-5 w-5'
+export const TAG_COLOR_PICKER_SIZE = 'h-6 w-8'
+export const TAG_COLOR_PICKER_SIZE_LG = 'h-8 w-10'
+
+// Avatar placeholder size (for feed empty state)
+export const AVATAR_ICON_SIZE = 'h-20 w-20'
+
+// Sidebar logo size (Omnis logo in sidebar)
+export const SIDEBAR_LOGO_SIZE = 'h-8 w-8'
+export const SIDEBAR_LOGO_STROKE_WIDTH = 2
+
 export const typeIcons: Record<ContentType, LucideIcon> = {
   link: Link2,
   tweet: Twitter,

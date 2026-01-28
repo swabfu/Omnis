@@ -15,77 +15,73 @@ npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
-## Development Principles: Think Globally, Never Hardcode
+## Development Principles: Think Globally, Act Globally, Save Tokens
 
-**Critical Rule:** Always implement at a global level—UI constants, database queries, API logic, validation, config. Hardcoded values create technical debt.
+**The Three Laws:**
+1. **Global First** - Every repeatable concept has ONE source of truth
+2. **Easy Discovery** - Global patterns must be easy to find, easy to use
+3. **Token Efficient** - Documentation and structure minimize redundant reads
 
-**CLAUDE.md Sync:** Update this file when adding new constants, utilities, patterns, routes, or schema changes. This is the single source of truth.
+**This applies to EVERYTHING:** UI constants, database queries, API logic, validation, types, error handling, file organization, naming conventions.
 
 ### Workflow
 
-1. **Search** the codebase for existing patterns before coding
-2. **Refactor** hardcoded values to global constants first (don't add debt)
-3. **Implement** using centralized patterns, follow naming conventions
-4. **Verify** that changing the source of truth updates all consumers
+1. **Search** before creating (5 seconds of search saves hours of refactoring)
+2. **Use existing** global patterns (don't reinvent)
+3. **Only then** create new global patterns if truly needed
+4. **Document** in ONE place (CLAUDE.md or inline)
 
 | ❌ BAD | ✅ GOOD |
 |-------|--------|
 | `className="h-4 w-4"` | `import { BADGE_ICON_SIZE } from '@/lib/type-icons'` |
-| `text-blue-500` everywhere | `import { typeColors } from '@/lib/type-icons'` |
-| `if (status === 'inbox')` | `import type { ItemStatus } from '@/types/database'` |
-| Fix in one place | Search all occurrences, fix globally |
+| `if (status === 'inbox')` | `import { INBOX_STATUS } from '@/lib/status-icons'` |
+| `fetch('/api/items')` | `import { fetchItems } from '@/lib/api/items'` |
+| Duplicate error handling | `import { handleError } from '@/lib/errors'` |
+| Fix in one place, leave duplicates | Search all, fix at source |
+| Long documentation | Concise, reference by need |
 
-### Quick Reference: Centralized Patterns
+### Global Patterns Must Be Easy
 
-| Need | File | Import |
-|------|------|--------|
-| Icon sizes | `lib/type-icons.tsx` | `NAV_ICON_SIZE`, `ACTION_ICON_SIZE`, `BADGE_ICON_SIZE`, `OVERLAY_ICON_SIZE`, `SMALL_ICON_SIZE`, `LABEL_ICON_SIZE`, `DROPDOWN_ICON_SIZE`, `LOADER_ICON_SIZE`, `LARGE_ICON_SIZE`, `SUCCESS_ICON_SIZE` |
-| Icon strokes | `lib/type-icons.tsx` | `NAV_ICON_STROKE_WIDTH`, `ACTION_ICON_STROKE_WIDTH`, etc. |
-| Type icons/colors | `lib/type-icons.tsx` | `typeIcons.link`, `typeColors.link` |
-| Type constants | `lib/type-icons.tsx` | `LINK_TYPE`, `TWEET_TYPE`, `IMAGE_TYPE`, `NOTE_TYPE` |
-| Status icons/colors | `lib/status-icons.tsx` | `statusIcons.inbox`, `statusColors.inbox`, `statusBadgeColors.done` |
-| Status constants | `lib/status-icons.tsx` | `INBOX_STATUS`, `DONE_STATUS`, `ARCHIVED_STATUS` |
-| Status component | `components/items/status-icon.tsx` | `<StatusIcon status="inbox" />` |
-| Tag colors | `lib/tag-colors.ts` | `PRESET_TAG_COLORS`, `DEFAULT_TAG_COLOR` |
-| View modes | `components/items/view-toggle.tsx` | `type ViewMode = 'masonry' \ 'uniform' \ 'list'` |
-| Supabase (browser) | `lib/supabase/client.ts` | `createClient()` |
-| Supabase (server) | `lib/supabase/server.ts` | `createClient()` |
-| Database types | `types/database.ts` | `type Database`, `ItemStatus`, `ContentType` |
-| Utils | `lib/utils.ts` | `cn()` |
-| Auth middleware | `lib/supabase/middleware.ts` | `updateSession()` |
-| Public routes | `middleware.ts` | `/login`, `/signup`, `/reset-password`, `/update-password`, `/auth/callback` |
+**If it's not easy, it won't be used.** When creating global patterns:
+- Use obvious naming (`BADGE_ICON_SIZE` not `BS`)
+- Group related things (one file, not eight)
+- Export from a central location when possible
+- Document inline where it's used
 
-### When Adding New Entities
+### Token Efficiency Rules
 
-1. Create `lib/{entity}.ts` with constants (icons, colors, sizes, labels)
-2. Export TypeScript types
-3. Export helper functions if needed
-4. Document usage in CLAUDE.md
+1. **Don't duplicate documentation** - Document once, reference elsewhere
+2. **Break large files into focused pieces** - Read what you need, not everything
+3. **Consolidate tiny files** - 8 files of 10 lines each = 8 file operations
+4. **Keep CLAUDE.md lean** - Reference tables in separate files, link to them
+5. **Code should document itself** - Types and names > comments
 
-```typescript
-// lib/your-entity.tsx
-import { YourIcon } from 'lucide-react'
+### Quick Reference: Where Things Live
 
-export const YOUR_ENTITY_ICON_SIZE = 'h-4 w-4'
-export const YOUR_ENTITY_STROKE_WIDTH = 2
+| Need | File |
+|------|------|
+| Icon sizes/strokes, type icons | `lib/type-icons.tsx` |
+| Status icons/colors/constants | `lib/status-icons.tsx` |
+| Tag colors, opacity values | `lib/tag-colors.ts` |
+| UI constants (dialog, sidebar, etc.) | `lib/ui-constants.ts` |
+| Interaction constants | `lib/interaction-constants.ts` |
+| Supabase client (browser/server) | `lib/supabase/{client|server}.ts` |
+| Database types | `types/database.ts` |
+| Utilities (cn, etc.) | `lib/utils.ts` |
 
-export const yourEntityIcons = { variant1: Icon1, variant2: Icon2 } as const
-export const yourEntityColors = { variant1: 'text-blue-500', variant2: 'text-green-500' } as const
-export type YourEntityType = keyof typeof yourEntityIcons
-```
+### When Adding New Global Patterns
+
+1. Check if it already exists (SEARCH FIRST)
+2. Add to existing file if related
+3. Create new file only if truly distinct
+4. Export from a central location if multiple files
+5. Update CLAUDE.md Quick Reference
 
 ### Naming Conventions
 
 - Single concept: `lib/{thing}.ts`
 - Multiple utilities: `lib/{category}/` directory
 - Supabase helpers: `lib/supabase/{purpose}.ts`
-
-### Non-UI Guidelines
-
-- **Database queries:** Reuse existing or extract to shared function
-- **Validation:** Centralize, don't duplicate across forms
-- **API endpoints:** Follow `app/api/` patterns
-- **Error messages:** Consider constants file for user-facing strings
 
 ### Next.js: Server vs Client Components
 
@@ -171,76 +167,24 @@ createServerClient<Database>(...)
 
 **Migrations:** New schema changes require manual migration in Supabase SQL Editor (files in `supabase/migrations/`).
 
-## Type Icons & Colors
+## Detailed References
 
-**File:** `lib/type-icons.tsx`
+See `docs/REFERENCES.md` for detailed documentation on:
+- Type icons & colors
+- Tag colors & opacity
+- Status icons & colors
+- View system modes
 
-**Constants (never hardcode):**
-- `NAV_ICON_SIZE = 'h-5 w-5'` / `NAV_ICON_STROKE_WIDTH = 2.5` (nav items)
-- `ACTION_ICON_SIZE = 'h-3 w-3'` / `ACTION_ICON_STROKE_WIDTH = 2.5` (edit, delete, plus, x)
-- `BADGE_ICON_SIZE = 'h-4 w-4'` / `BADGE_ICON_STROKE_WIDTH = 2.5` (tags, small icons in cards)
-- `OVERLAY_ICON_SIZE = 'h-2.5 w-2.5'` / `OVERLAY_ICON_STROKE_WIDTH = 3` (pencil on tag hover)
-- `SMALL_ICON_SIZE = 'h-3 w-3'` (external links)
-- `LABEL_ICON_SIZE = 'h-4.5 w-4.5'` / `LABEL_ICON_STROKE_WIDTH = 2.5` (badge labels on item cards)
-- `DROPDOWN_ICON_SIZE = 'h-3.5 w-3.5'` / `DROPDOWN_ICON_STROKE_WIDTH = 2.5` (dropdown triggers)
-- `LOADER_ICON_SIZE = 'h-8 w-8'` / `LOADER_ICON_STROKE_WIDTH = 2.5` (loading spinners)
-- `LARGE_ICON_SIZE = 'h-10 w-10'` / `LARGE_ICON_STROKE_WIDTH = 2` (upload placeholders)
-- `SUCCESS_ICON_SIZE = 'h-16 w-16'` / `SUCCESS_ICON_STROKE_WIDTH = 2.5` (auth success pages)
+### Agent Model Selection
 
-**Icons:** `all` (Inbox), `link` (Link2), `tweet` (Twitter), `image` (ImageIcon), `note` (FileText)
+**Reference:** `.claude/agent-models.md`
 
-**Colors:** `all` (gray), `link` (green), `tweet` (sky), `image` (red), `note` (yellow)
+Before spawning agents via Task tool, check the recommended model. Default to `sonnet` for most work. Use `haiku` for pattern matching, `opus` for complex architecture/unfamiliar codebases.
 
-```typescript
-import { typeIcons, typeColors, BADGE_ICON_SIZE, BADGE_ICON_STROKE_WIDTH } from '@/lib/type-icons'
-<Icon className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
-```
-
-## Tag Colors
-
-**File:** `lib/tag-colors.ts`
-
-**Constants (never hardcode):**
-- `PRESET_TAG_COLORS` - Array of 17 hex colors for tag color picker
-- `DEFAULT_TAG_COLOR = '#3b82f6'` - Default blue color for new tags
-
-```typescript
-import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR } from '@/lib/tag-colors'
-```
-
-## Status Icons & Colors
-
-**File:** `lib/status-icons.tsx`
-
-**Icons:** `Inbox`, `CheckCircle` (done), `Archive` (archived)
-
-**Colors:** `inbox` (neutral), `done` (green), `archived` (orange)
-
-**Variants:** `statusColors` (nav, text only), `statusBadgeColors` (badges with bg)
-
-**Status constants (avoid magic strings):**
-- `INBOX_STATUS = 'inbox'`
-- `DONE_STATUS = 'done'`
-- `ARCHIVED_STATUS = 'archived'`
-
-**Badge icon size:**
-- `STATUS_BADGE_ICON_SIZE = 'h-4.5 w-4.5'` / `STATUS_BADGE_STROKE_WIDTH = 2.5`
-
-```typescript
-import { StatusIcon } from '@/components/items/status-icon'
-import { statusColors, DONE_STATUS } from '@/lib/status-icons'
-<StatusIcon status={DONE_STATUS} />
-```
-
-## View System
-
-**File:** `components/items/view-toggle.tsx`
-
-**Modes:** `masonry` (default, Pinterest), `uniform` (grid), `list` (compact)
-
-**Components:** `view-toggle.tsx` (toggle), `list-view.tsx` (container), `item-card.tsx` (variant: 'card' | 'list')
-
-**State:** Managed in `components/home-client.tsx`, passed to `ClientFeed` and `Header`. Fade/scale transition (250ms ease-in-out).
+**Protocol:**
+1. Check `.claude/agent-models.md`
+2. Assess task complexity
+3. Specify `model: "haiku|sonnet|opus"` in Task call
 
 ## Code Review Checklist
 
