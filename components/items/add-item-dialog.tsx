@@ -174,7 +174,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       // Upload to Supabase Storage
       const fileExt = imageFile.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `images/${fileName}`
+      const filePath = `${user.id}/images/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('items')
