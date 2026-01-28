@@ -17,20 +17,12 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Core functionality that is broken or missing. Fix these first — they block core functionality.*
 
-- [x] **Image upload broken** - Cannot upload images; RLS error: `failed to upload image, new row violates row-level security policy` on localhost
-  - **Fixed:** Created items storage bucket with RLS policies; uploads work on localhost and Vercel
-- [x] **Unified filter system (part 1)** - Tag pages now use ClientFeed like type/status pages; TagFeed component removed
-  - **Fixed:** All filter pages use unified ClientFeed component with proper title rendering
-- [x] **Pagination + performance** - Added `item_tags` indexes, pagination (50 items/page), Load More button
-  - **Fixed:** Migration `20250128_add_item_tags_indexes.sql`, feed.tsx pagination
-- [x] **Load More race condition** - Fixed circular dependency causing multiple requests
-  - **Fixed:** handleLoadMore now fetches directly, no longer relies on useEffect chain
-- [ ] **Sign out broken** - Clicking sign out doesn't sign users out or redirect to launch screen
-- [ ] **Password reset email error** - Forgot password email redirects to `localhost:3000/?error=access_denied&error_code=otp_expired`
+- [ ] **Password reset system investigation** - Deep investigation needed; entire auth flow may need rework
+  - Current symptom: Forgot password email redirects to `localhost:3000/?error=access_denied&error_code=otp_expired`
+  - Investigate: Supabase auth settings, email templates, callback handling, redirect URLs
+  - May need: Complete password reset system rework
 - [ ] **Tag deletion not syncing** - When creating then deleting a new tag in the Add Item dialog, the tag visually disappears from the dialog but still appears elsewhere in the app (sidebar, tag pages)
 - [ ] **Status page icon bug** - "Move to inbox" button in Done/Archived pages shows checkmark instead of inbox/tray icon; ensure global icon source
-- [x] **Status page titles wrong** - All status pages show "All Items" instead of correct title ("Inbox", "Done", "Archived")
-  - **Fixed:** ClientFeed now uses `statusLabels` from `lib/status-icons.tsx` for proper titles
 - [ ] **Can't create new tags via Add Item** - Can add new tags via Edit Item but not via New Item; dialog auto-submits instead of letting user create tag (old bug that has regressed)
 - [ ] **Icon colors gone in items** - Type icons not showing their colors in item cards (regression)
 

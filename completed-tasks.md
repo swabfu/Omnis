@@ -1,5 +1,17 @@
 
 ## Critical Bugs (Completed)
+- [x] **Image upload broken** - Cannot upload images; RLS error on localhost
+  - **Fixed:** Created items storage bucket with RLS policies; uploads work on localhost and Vercel
+- [x] **Sign out broken** - Clicking sign out didn't sign users out or redirect
+  - **Fixed:** Removed in separate session
+- [x] **Unified filter system (part 1)** - Tag pages used separate TagFeed component
+  - **Fixed:** All filter pages now use unified ClientFeed; TagFeed removed
+- [x] **Status page titles wrong** - All status pages showed "All Items"
+  - **Fixed:** ClientFeed now uses `statusLabels` from `lib/status-icons.tsx`
+- [x] **Pagination + performance** - No pagination, tag filtering slow
+  - **Fixed:** Added `item_tags` indexes migration, 50 items/page pagination, Load More button
+- [x] **Load More race condition** - Multiple requests fired, items out of order
+  - **Fixed:** Removed circular dependency; handleLoadMore fetches directly
 - [x] **Search doesn't work** - Search functionality is non-functional (merged into context-aware search)
 - [x] **Cannot edit entries** - No way to add tags or edit existing items after saving
 - [x] **Cannot tag entries before auto-save** - Some items automatically save before user can add tags
