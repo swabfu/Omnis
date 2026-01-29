@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getNextSortOrder } from '@/lib/supabase/tags'
+import { getNextSortOrder, TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -58,6 +58,15 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid effect usage
     fetchTags()
+
+    const handleTagsUpdated = () => {
+      fetchTags()
+    }
+
+    window.addEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    return () => {
+      window.removeEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    }
   }, [fetchTags])
 
   const handleCreateTag = async () => {
@@ -157,6 +166,7 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
               placeholder="Tag name..."
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault()
@@ -229,7 +239,7 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
               </span>
             </div>
           </div>
-          <Button size="sm" onClick={handleCreateTag}>
+          <Button type="button" size="sm" onClick={handleCreateTag}>
             Add
           </Button>
         </div>
@@ -250,6 +260,7 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
             </Badge>
           ))}
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className="h-6 px-2 text-xs"

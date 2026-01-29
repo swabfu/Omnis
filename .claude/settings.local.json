@@ -19,7 +19,8 @@
       "Edit(**.md)",
       "Bash(grep:*)",
       "Bash(dir:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTransitionState } from '@/lib/hooks/use-transition-state'
 import { ContentType, ItemStatus, Database, ViewMode } from '@/types/database'
 import { ItemCard } from './item-card'
 import { MasonryGrid, MasonryItem } from './masonry-grid'
@@ -11,7 +12,6 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LOADER_ICON_SIZE, AVATAR_ICON_SIZE, BUTTON_ICON_SIZE } from '@/lib/type-icons'
 import { DRAGGING_OPACITY, NORMAL_OPACITY } from '@/lib/opacity-constants'
-import { TRANSITION_IN_DELAY, TRANSITION_OUT_DELAY } from '@/lib/timeout-constants'
 import { Button } from '@/components/ui/button'
 
 // Pagination: load items in batches for better performance
@@ -45,37 +45,25 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(1)
-  const [transitionPhase, setTransitionPhase] = useState<'idle' | 'out' | 'in'>('idle')
-  const [displayView, setDisplayView] = useState<ViewMode>('masonry')
   const currentView = view ?? 'masonry'
   const supabase = createClient()
-  const prevViewRef = useRef(currentView)
   const filtersRef = useRef({ initialType, initialStatus, initialTagId, searchResults })
 
-  // Handle view transition with slide/fade animation
+  // Use global transition hook for view switching animations
+  const { phase, displayValue: displayView, transitionTo } = useTransitionState(currentView)
+
+  // Handle view changes using the global hook
+  const prevViewRef = useRef(currentView)
   useEffect(() => {
-    if (prevViewRef.current !== currentView && !loading) {
-      // Phase 1: Fade out + slide out (gentle)
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- View transition state updates are valid effect usage
-      setTransitionPhase('out')
-      const outTimer = setTimeout(() => {
-        // Phase 2: Switch content during fade
-        setDisplayView(currentView)
-        // Phase 3: Fade in + slide in
-        setTransitionPhase('in')
-        const inTimer = setTimeout(() => {
-          setTransitionPhase('idle')
-        }, TRANSITION_IN_DELAY)
-        prevViewRef.current = currentView
-        return () => clearTimeout(inTimer)
-      }, TRANSITION_OUT_DELAY)
-      return () => clearTimeout(outTimer)
+    if (prevViewRef.current !== currentView) {
+      transitionTo(currentView)
+      prevViewRef.current = currentView
     }
-  }, [currentView, loading])
+  }, [currentView, transitionTo])
 
   // Get animation classes based on transition phase
   const getAnimationClasses = () => {
-    switch (transitionPhase) {
+    switch (phase) {
       case 'out':
         return `${DRAGGING_OPACITY} scale-[0.99] translate-y-0.5`
       case 'in':

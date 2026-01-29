@@ -11,7 +11,7 @@ import {
 import { MoreVertical, Check, Archive, Trash2, FileEdit } from 'lucide-react'
 import { ItemStatus } from '@/types/database'
 import { BADGE_ICON_SIZE, DROPDOWN_ICON_SIZE, ICON_BUTTON_SIZE_MD } from '@/lib/type-icons'
-import { INBOX_STATUS, DONE_STATUS, ARCHIVED_STATUS } from '@/lib/status-icons'
+import { INBOX_STATUS, DONE_STATUS, ARCHIVED_STATUS, statusIcons } from '@/lib/status-icons'
 
 interface ItemCardActionsProps {
   status: ItemStatus
@@ -22,6 +22,8 @@ interface ItemCardActionsProps {
 }
 
 export function ItemCardActions({ status, onEdit, onStatusChange, onDelete, variant = 'card' }: ItemCardActionsProps) {
+  const InboxIcon = statusIcons.inbox
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -50,7 +52,7 @@ export function ItemCardActions({ status, onEdit, onStatusChange, onDelete, vari
         )}
         {status !== INBOX_STATUS && (
           <DropdownMenuItem onClick={() => onStatusChange('inbox')}>
-            <Check className={`mr-2 ${BADGE_ICON_SIZE}`} />
+            <InboxIcon className={`mr-2 ${BADGE_ICON_SIZE}`} />
             Move to Inbox
           </DropdownMenuItem>
         )}

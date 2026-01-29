@@ -1,5 +1,16 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 
+// Event name for tag updates across components
+export const TAGS_UPDATED_EVENT = 'omnis:tags-updated'
+
+/**
+ * Dispatch the global tag update event to notify all listeners.
+ * Call this after creating, updating, or deleting tags.
+ */
+export function dispatchTagsUpdated() {
+  window.dispatchEvent(new CustomEvent(TAGS_UPDATED_EVENT))
+}
+
 /**
  * Delete a tag and all its associations with items.
  * @param tagId - The ID of the tag to delete

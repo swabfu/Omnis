@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getResetPasswordUrl } from '@/lib/config/urls'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,32 +13,26 @@ import { statusColors } from '@/lib/status-icons'
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [debugInfo, setDebugInfo] = useState('')
   const supabase = createClient()
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
-    setDebugInfo('')
+    setError(null)
 
     try {
-      setDebugInfo('Sending reset email...')
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: getResetPasswordUrl(),
       })
 
       if (error) {
-        setDebugInfo(`Error: ${error.message}`)
         setError(error.message)
       } else {
-        setDebugInfo(`Success! Data: ${JSON.stringify(data)}`)
         setSuccess(true)
       }
-    } catch (err) {
-      setDebugInfo(`Exception: ${err}`)
+    } catch {
       setError('An unexpected error occurred')
     }
 
@@ -102,11 +97,6 @@ export default function ResetPasswordPage() {
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
                 <AlertCircle className={BADGE_ICON_SIZE} />
                 {error}
-              </div>
-            )}
-            {debugInfo && (
-              <div className="p-2 bg-muted rounded text-xs text-muted-foreground">
-                {debugInfo}
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>

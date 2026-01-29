@@ -32,6 +32,7 @@ Prioritized backlog of improvements, bugs, and features.
 
 - [ ] **Unified filter system (part 2)** - Enable combining filters (e.g., filter by tag within archived, tag within content type)
   - Part 1 done: all pages use unified ClientFeed
+  - **Progress (Jan 2025):** Route groups + React Context foundation complete. SearchContext and ViewModeProvider now enable global state without prop drilling.
   - **Remaining:** Share global attributes/filters across pages, avoid per-page configuration
   - **This enables:** context-aware search, combining filters, consistent UI across pages, sort entries
   - MUST use global filter patterns - no per-page config

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LogOut, Plus, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { deleteTagWithAssociations } from '@/lib/supabase/tags'
+import { deleteTagWithAssociations, dispatchTagsUpdated, TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -50,14 +50,6 @@ import { SidebarTagItem } from './sidebar-tag-item'
 import { SidebarContentTypesNav, SidebarStatusNav } from './sidebar-nav-sections'
 
 type Tag = Database['public']['Tables']['tags']['Row']
-
-// Event name for tag updates across components
-export const TAGS_UPDATED_EVENT = 'omnis:tags-updated'
-
-// Helper function to dispatch tag update event
-export function dispatchTagsUpdated() {
-  window.dispatchEvent(new CustomEvent(TAGS_UPDATED_EVENT))
-}
 
 export function Sidebar() {
   const pathname = usePathname()

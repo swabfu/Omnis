@@ -15,38 +15,35 @@ npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
-## Development Principles: Think Globally, Act Globally, Save Tokens
+## Development Principles
 
-**The Three Laws:**
-1. **Global First** - Every repeatable concept has ONE source of truth
-2. **Easy Discovery** - Global patterns must be easy to find, easy to use
-3. **Token Efficient** - Documentation and structure minimize redundant reads
-
-**This applies to EVERYTHING:** UI constants, database queries, API logic, validation, types, error handling, file organization, naming conventions.
+**Core Pattern: DRY (Don't Repeat Yourself)**
+- Every repeatable concept has ONE source of truth
+- Shared layouts via route groups (parent provides, children consume)
+- React Context for UI state (not prop drilling)
+- Global patterns must be easy to find and use
 
 ### Workflow
 
-1. **Search** before creating (5 seconds of search saves hours of refactoring)
-2. **Use existing** global patterns (don't reinvent)
-3. **Only then** create new global patterns if truly needed
-4. **Document** in ONE place (CLAUDE.md or inline)
+1. Search before creating (5 seconds of search saves hours of refactoring)
+2. Use existing patterns (don't reinvent)
+3. Only then create new patterns if truly needed
+4. Document in ONE place
 
-| ❌ BAD | ✅ GOOD |
-|-------|--------|
-| `className="h-4 w-4"` | `import { BADGE_ICON_SIZE } from '@/lib/type-icons'` |
-| `if (status === 'inbox')` | `import { INBOX_STATUS } from '@/lib/status-icons'` |
-| `fetch('/api/items')` | `import { fetchItems } from '@/lib/api/items'` |
-| Duplicate error handling | `import { handleError } from '@/lib/errors'` |
-| Fix in one place, leave duplicates | Search all, fix at source |
-| Long documentation | Concise, reference by need |
+| Avoid | Instead |
+|-------|----------|
+| `className="h-4 w-4"` | `import { BADGE_ICON_SIZE }` |
+| `if (status === 'inbox')` | `import { INBOX_STATUS }` |
+| `fetch('/api/items')` | `import { fetchItems }` |
+| Duplicated layout code | Route groups with shared layout |
+| Prop drilling state | React Context |
+| Fix in one place | Search all, fix at source |
 
-### Global Patterns Must Be Easy
+### Making Patterns Easy
 
-**If it's not easy, it won't be used.** When creating global patterns:
-- Use obvious naming (`BADGE_ICON_SIZE` not `BS`)
+- Obvious naming (`BADGE_ICON_SIZE` not `BS`)
 - Group related things (one file, not eight)
-- Export from a central location when possible
-- Document inline where it's used
+- Export from central location when possible
 
 ### Token Efficiency Rules
 
@@ -68,8 +65,11 @@ npm run lint     # Run ESLint
 | Supabase client (browser/server) | `lib/supabase/{client|server}.ts` |
 | Database types | `types/database.ts` |
 | Utilities (cn, etc.) | `lib/utils.ts` |
+| Auth layout (Sidebar + Header) | `app/(auth)/layout.tsx` |
+| View mode context | `lib/context/view-mode-context.tsx` |
+| Search context | `lib/context/search-context.tsx` |
 
-### When Adding New Global Patterns
+### When Adding New Patterns
 
 1. Check if it already exists (SEARCH FIRST)
 2. Add to existing file if related
@@ -136,20 +136,35 @@ All other routes require auth. Unauthenticated → `/login`. Authenticated on `/
 
 ### App Router Structure
 
+**Route Groups for Shared Layouts**
+- `app/(auth)/` - Authenticated pages share ONE layout (Sidebar + Header + auth check)
+- `app/(public)/` - Public pages (login, signup) with no layout
+- UI state uses React Context (view mode, search), NOT prop drilling
+
 ```
 app/
-├── api/              # API routes
-├── auth/             # Auth callback pages
-├── type/[type]       # Filter by content type
-├── tags/             # Tag management
-├── status/[status]   # Filter by status (inbox, done, archived)
-├── login/            # Login page
-├── signup/           # Sign-up page
-├── reset-password/   # Password reset request
-├── update-password/  # Password reset form
-├── layout.tsx        # Root layout with AuthProvider
-└── page.tsx          # Home page (requires auth)
+├── (auth)/                    # Authenticated pages - shared layout
+│   ├── layout.tsx            ← Sidebar + Header + auth check
+│   ├── page.tsx              ← Renders <ClientFeed />
+│   ├── status/[status]/
+│   ├── type/[type]/
+│   └── tag/[id]/
+├── (public)/                 # Public pages
+│   ├── login/
+│   ├── signup/
+│   ├── reset-password/
+│   ├── update-password/
+│   └── auth/callback/
+├── api/
+├── layout.tsx                # Root: ViewModeProvider, AuthProvider
+└── globals.css
 ```
+
+**Adding New Pages:**
+- Authenticated → `app/(auth)/{name}/page.tsx` → Just render content
+- Public → `app/(public)/{name}/page.tsx`
+- Never add `<Sidebar />`, `<Header />`, or auth check to pages
+- For search → Wrap with `<SearchProvider>`
 
 ### Type Safety
 

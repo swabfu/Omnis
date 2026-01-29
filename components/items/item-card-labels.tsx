@@ -33,8 +33,7 @@ export function ItemCardLabels({ type, status, tags }: ItemCardLabelsProps) {
     <div className="flex items-center gap-2 flex-wrap">
       {/* Type icon */}
       <div
-        className="flex items-center justify-center px-2 py-1 rounded-md"
-        style={{ color: typeColor }}
+        className={typeColor}
         title={type}
       >
         <TypeIcon className={LABEL_ICON_SIZE} strokeWidth={LABEL_ICON_STROKE_WIDTH} />

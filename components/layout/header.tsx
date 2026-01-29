@@ -2,7 +2,7 @@
 
 import { SearchInput } from '@/components/items/search-input'
 import { ViewToggle } from '@/components/items/view-toggle'
-import { type ViewMode } from '@/types/database'
+import { useViewMode } from '@/lib/context/view-mode-context'
 import type { ItemWithTags } from '@/components/items/feed'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
@@ -12,11 +12,10 @@ interface HeaderProps {
   onSearchResults?: (items: ItemWithTags[]) => void
   onSearchClear?: () => void
   isSearching?: boolean
-  view?: ViewMode
-  onViewChange?: (view: ViewMode) => void
 }
 
-export function Header({ onSearchResults, onSearchClear, isSearching, view, onViewChange }: HeaderProps) {
+export function Header({ onSearchResults, onSearchClear, isSearching }: HeaderProps) {
+  const { view, setView } = useViewMode()
   // If search handlers are provided, use the full SearchInput
   // Otherwise, show a placeholder (non-functional) input for visual consistency
   const hasSearch = onSearchResults && onSearchClear
@@ -43,9 +42,7 @@ export function Header({ onSearchResults, onSearchClear, isSearching, view, onVi
       </div>
       <div className="flex items-center gap-3">
         {isSearching && <span className="text-sm font-medium text-muted-foreground">Searching...</span>}
-        {onViewChange && view && (
-          <ViewToggle view={view} onChange={onViewChange} />
-        )}
+        <ViewToggle view={view} onChange={setView} />
       </div>
     </header>
   )

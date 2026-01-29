@@ -50,7 +50,7 @@ export default function SignupPage() {
       return
     }
 
-        const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -60,7 +60,6 @@ export default function SignupPage() {
     if (error) {
       setError(error.message)
     } else {
-
       // Account created! Now sign them in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
