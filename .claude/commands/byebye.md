@@ -18,6 +18,52 @@ git status
 git diff --stat
 ```
 
+### 1.5. Deep Analysis (Compare with Last Commit)
+
+**CRITICAL:** Work often spans multiple sessions and files. Memory alone is NOT sufficient. Before committing, perform a deep analysis comparing the most recent commit with the current state to understand EVERYTHING that changed at the code level.
+
+```bash
+# Get the last commit for reference
+git log -1 --oneline
+
+# Full diff with context - shows actual code changes
+git diff HEAD
+
+# Summary of changes (files added/modified/deleted)
+git diff --name-status HEAD
+```
+
+**Deep Analysis Checklist - Examine the actual code changes:**
+
+1. **New files** - Read each new file to understand:
+   - What functionality/pattern does it add?
+   - How does it integrate with existing code?
+
+2. **Deleted files** - Understand:
+   - What functionality was removed?
+   - Was it replaced or is it gone?
+
+3. **Modified files** - For each file changed:
+   - What specific code changed (functions, components, logic)?
+   - Why was this change necessary?
+
+4. **Architectural patterns** - Look for:
+   - New patterns introduced (contexts, route groups, utilities)
+   - Refactoring (DRY improvements, consolidating duplicates)
+   - Breaking changes
+
+5. **Cross-file relationships** - Understand:
+   - How do changes in one file affect others?
+   - Are there related changes that should be mentioned together?
+
+**Commit message must describe:**
+- Main change summary
+- All new files and their purpose
+- All deleted files and reason
+- Key refactoring patterns used
+- Architectural decisions made
+- Any breaking changes
+
 ### 2. Sync CLAUDE.md (add/change/delete)
 
 Update `CLAUDE.md` to reflect this session's changes:

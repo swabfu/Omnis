@@ -7,10 +7,10 @@ Prioritized backlog of improvements, bugs, and features.
 ---
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# CRITICAL: CLAUDE.md THREE LAWS ARE MANDATORY FOR EVERY TASK
-# Law 1: Global First - Every repeatable concept has ONE source of truth
-# Law 2: Easy Discovery - Global patterns must be easy to find, easy to use
-# Law 3: Token Efficient - Documentation and structure minimize redundant reads
+# DEVELOPMENT PRINCIPLES (from CLAUDE.md)
+# Core: DRY - One source of truth for every repeatable concept
+# Workflow: Search → Use existing → Create only if needed → Document once
+# Route groups for layouts, React Context for state, global patterns easy to find
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## PHASE 1: Critical Bugs
@@ -21,10 +21,6 @@ Prioritized backlog of improvements, bugs, and features.
   - Current symptom: Forgot password email redirects to `localhost:3000/?error=access_denied&error_code=otp_expired`
   - Investigate: Supabase auth settings, email templates, callback handling, redirect URLs
   - May need: Complete password reset system rework
-- [ ] **Tag deletion not syncing** - When creating then deleting a new tag in the Add Item dialog, the tag visually disappears from the dialog but still appears elsewhere in the app (sidebar, tag pages)
-- [ ] **Status page icon bug** - "Move to inbox" button in Done/Archived pages shows checkmark instead of inbox/tray icon; ensure global icon source
-- [ ] **Can't create new tags via Add Item** - Can add new tags via Edit Item but not via New Item; dialog auto-submits instead of letting user create tag (old bug that has regressed)
-- [ ] **Icon colors gone in items** - Type icons not showing their colors in item cards (regression)
 
 ## PHASE 2: Foundation & Architecture
 
@@ -44,7 +40,7 @@ Prioritized backlog of improvements, bugs, and features.
 
 - [ ] **Context-aware search** - Search within current context (type/status/tag) with special prefixes
   - **DEPENDS ON:** Unified filter system
-  - **BUG:** Currently only works on "All Items" page; implement globally (follow CLAUDE.md — use shared components, no per-page config)
+  - **BUG:** Search currently only works on "All Items" page; implement globally/DRY/shared layouts/etc (follow CLAUDE.md principles and architecture — use shared components, no per-page config)
   - **Local search by default:** When on `/type/links`, search only links. When on `/status/inbox`, search only inbox items.
   - **Smart placeholder:** Search bar shows context (e.g., "Search links..." on links page, "Search inbox..." on inbox page, "Search all items..." on home)
   - **Auto-prefix with escape hatch:** Clicking search auto-fills context prefix (e.g., `type:link `, `status:inbox `, `tag:design `) but user can backspace to remove for global search
@@ -97,8 +93,6 @@ Prioritized backlog of improvements, bugs, and features.
 *Refactoring, cleanup, and quality assurance.*
 
 - [ ] **Password validation UX** - Show all password requirement errors simultaneously, not one at a time
-- [ ] **Mobile touch targets** - Ensure all buttons are at least 44x44px on mobile
-- [ ] **Input font-size fix** - Set minimum 16px on mobile inputs to prevent iOS auto-zoom
 - [ ] **Middleware rework** - Address caution messages; future-proof implementation (investigate and make judgment call)
 
 ---
