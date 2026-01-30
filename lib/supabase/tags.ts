@@ -94,19 +94,3 @@ export async function getNextSortOrder(
 
   return (maxOrder?.sort_order ?? -1) + 1
 }
-
-/**
- * Bulk update tag sort orders in a single RPC call.
- * Replaces N separate update queries with one transaction.
- * @param updates - Array of {id, sort_order} objects
- * @param supabase - Supabase client instance
- */
-export async function bulkUpdateTagSortOrder(
-  updates: Array<{ id: string; sort_order: number }>,
-  supabase: SupabaseClient
-): Promise<void> {
-  const { error } = await supabase.rpc('bulk_update_tag_sort_order', {
-    updates: JSON.stringify(updates),
-  })
-  if (error) throw error
-}

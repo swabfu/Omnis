@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { LogOut, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { deleteTagWithAssociations, bulkUpdateTagSortOrder } from '@/lib/supabase/tags'
+import { deleteTagWithAssociations } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -120,12 +120,17 @@ export function Sidebar() {
     setTags(newTags)
 
     try {
-      // Single bulk update RPC call instead of N separate queries
       const updates = newTags.map((tag, index) => ({
         id: tag.id,
         sort_order: index,
       }))
-      await bulkUpdateTagSortOrder(updates, supabase)
+
+      for (const update of updates) {
+        await supabase
+          .from('tags')
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id)
+      }
     } catch {
       setTags(tags)
     }
