@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTransitionState } from '@/lib/hooks/use-transition-state'
 import { useViewMode } from '@/lib/context/view-mode-context'
+import { TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
 import { ContentType, ItemStatus, Database, ViewMode } from '@/types/database'
 import { ItemCard } from './item-card'
 import { MasonryGrid, MasonryItem } from './masonry-grid'
@@ -14,23 +15,15 @@ import { cn } from '@/lib/utils'
 import { LOADER_ICON_SIZE, AVATAR_ICON_SIZE, BUTTON_ICON_SIZE } from '@/lib/type-icons'
 import { DRAGGING_OPACITY, NORMAL_OPACITY } from '@/lib/opacity-constants'
 import { Button } from '@/components/ui/button'
+import type { ItemWithTags, Tag } from '@/types/items'
 
 // Pagination: load items in batches for better performance
 const PAGE_SIZE = 50
 
 type Item = Database['public']['Tables']['items']['Row']
 
-interface Tag {
-  id: string
-  name: string
-  color?: string
-}
-
-interface ItemWithTags extends Item {
-  tags: Tag[]
-}
-
-export type { ItemWithTags }
+// Re-export for convenience (other components may import from here)
+export type { ItemWithTags, Tag } from '@/types/items'
 
 interface FeedProps {
   initialType?: ContentType
@@ -97,11 +90,7 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
         .select(`
           items (
             *,
-            tags (
-              id,
-              name,
-              color
-            )
+            tags (*)
           )
         `)
         .eq('tag_id', initialTagId)
@@ -132,11 +121,7 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
       .from('items')
       .select(`
         *,
-        tags (
-          id,
-          name,
-          color
-        )
+        tags (*)
       `)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1)
@@ -190,6 +175,18 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
     }
   }, [initialType, initialStatus, initialTagId, searchResults])
 
+  // Re-fetch items when tags are updated (deleted, created, or modified)
+  useEffect(() => {
+    const handleTagsUpdated = () => {
+      fetchItems()
+    }
+
+    window.addEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    return () => {
+      window.removeEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
+    }
+  }, [fetchItems])
+
   const handleLoadMore = async () => {
     // Check both state and ref to prevent race conditions on rapid clicks
     if (loadingMore || !hasMore || isLoadingMoreRef.current) return
@@ -208,11 +205,7 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
           .select(`
             items (
               *,
-              tags (
-                id,
-                name,
-                color
-              )
+              tags (*)
             )
           `)
           .eq('tag_id', initialTagId)
@@ -241,11 +234,7 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
         .from('items')
         .select(`
           *,
-          tags (
-            id,
-            name,
-            color
-          )
+          tags (*)
         `)
         .order('created_at', { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1)

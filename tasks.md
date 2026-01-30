@@ -92,6 +92,10 @@ Prioritized backlog of improvements, bugs, and features.
 
 *Refactoring, cleanup, and quality assurance.*
 
+- [x] **N+1 Query on Tag Reorder** - Created `bulk_update_tag_sort_order` RPC function; replaced loop with single bulk update
+- [x] **Duplicated Tag Fetching** - Created shared `lib/hooks/use-tags.ts` hook; removed duplicate fetchTags from sidebar, tag-selector, tag-manager
+- [x] **Duplicated Type Definitions** - Created `types/items.ts` with shared Tag/ItemWithTags types; removed duplicates from 5+ files
+- [x] **Tag sync across Feed** - Feed now listens to TAGS_UPDATED_EVENT; items refresh when tags are deleted/modified
 - [ ] **Password validation UX** - Show all password requirement errors simultaneously, not one at a time
 - [ ] **Middleware rework** - Address caution messages; future-proof implementation (investigate and make judgment call)
 

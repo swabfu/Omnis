@@ -2,58 +2,7 @@
 
 ## High Priority - Performance & DRY Violations
 
-### 1. N+1 Query on Tag Reorder
-**File:** `components/layout/sidebar.tsx` lines 162-167
-
-**Issue:** Reordering tags makes N separate database calls instead of one bulk operation.
-
-**Fix:** Create Supabase RPC function or bulk update approach.
-```typescript
-// Current (bad):
-for (const update of updates) {
-  await supabase.from('tags').update({ sort_order }).eq('id', update.id)
-}
-
-// Target: Single bulk update query or RPC function
-```
-
----
-
-### 2. Duplicated Tag Fetching
-**Files:** `sidebar.tsx`, `tag-selector.tsx`, `tag-manager-dialog.tsx`
-
-**Issue:** Three components have identical `fetchTags` functions.
-
-**Fix:** Create shared hook `lib/hooks/use-tags.ts`:
-```typescript
-export function useTags() {
-  const { user } = useAuth()
-  const [tags, setTags] = useState<Tag[]>([])
-  const supabase = createClient()
-  // fetch, useEffect with TAGS_UPDATED_EVENT listener
-  return { tags, fetchTags, setTags }
-}
-```
-
----
-
-### 3. Duplicated Type Definitions
-**Files:** `feed.tsx`, `item-card.tsx`, `search-input.tsx`, `add-item-dialog.tsx`, `edit-item-dialog.tsx`
-
-**Issue:** `Tag` and `ItemWithTags` interfaces defined in 5+ files.
-
-**Fix:** Export from `types/items.ts`:
-```typescript
-// types/items.ts
-export interface Tag { id: string; name: string; color?: string }
-export type ItemWithTags = Database['public']['Tables']['items']['Row'] & { tags: Tag[] }
-```
-
-Then replace all local definitions with imports.
-
----
-
-### 4. Duplicated Color Picker UI
+### 1. Duplicated Color Picker UI
 **Files:** `tag-manager-dialog.tsx` lines 188-230, `tag-selector.tsx` lines 182-230
 
 **Issue:** Nearly identical color picker code in two places.
@@ -64,7 +13,7 @@ Then replace all local definitions with imports.
 
 ## Medium Priority
 
-### 5. Inconsistent Error Handling
+### 2. Inconsistent Error Handling
 **Files:** Multiple
 
 **Issue:** Error handling patterns vary (silent catches, toasts, console.error).
@@ -79,7 +28,7 @@ export function handleApiError(error: unknown, context: string) {
 
 ---
 
-### 6. Direct `useContext()` Instead of Custom Hook
+### 3. Direct `useContext()` Instead of Custom Hook
 **File:** `components/layout/search-header.tsx` line 15
 
 **Issue:** Uses `useContext(SearchContext)` directly instead of `useSearch()`.
@@ -88,7 +37,7 @@ export function handleApiError(error: unknown, context: string) {
 
 ---
 
-### 7. Environment Variable Assumptions
+### 4. Environment Variable Assumptions
 **File:** `lib/supabase/client.ts`
 
 **Issue:** Uses `!` assertion, assumes env vars always exist.
@@ -110,3 +59,6 @@ For completed work, see git history for:
 - React.memo on ItemCard
 - Context memoization
 - Transition timing fix
+- **N+1 Query fix** - Bulk tag sort order via RPC function
+- **Duplicated Tag Fetching fix** - Shared `useTags()` hook
+- **Duplicated Type Definitions fix** - Centralized `types/items.ts`

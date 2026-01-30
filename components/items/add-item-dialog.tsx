@@ -31,12 +31,7 @@ import {
 } from '@/lib/type-icons'
 import { TITLE_TRUNCATE_LENGTH, TRUNCATE_ELLIPSIS } from '@/lib/truncate-constants'
 import { METADATA_DEBOUNCE_DELAY } from '@/lib/timeout-constants'
-
-interface Tag {
-  id: string
-  name: string
-  color?: string
-}
+import type { Tag } from '@/types/items'
 
 interface AddItemDialogProps {
   onItemAdded?: () => void

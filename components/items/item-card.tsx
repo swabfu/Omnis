@@ -13,18 +13,9 @@ import { ItemCardContent } from './item-card-content'
 import { ItemCardLabels } from './item-card-labels'
 import { TITLE_LINE_CLAMP } from '@/lib/text-style-constants'
 import { LINK_TYPE } from '@/lib/type-icons'
+import type { ItemWithTags, Tag } from '@/types/items'
 
 type Item = Database['public']['Tables']['items']['Row']
-
-interface Tag {
-  id: string
-  name: string
-  color?: string
-}
-
-interface ItemWithTags extends Item {
-  tags: Tag[]
-}
 
 interface ItemCardProps {
   id: string

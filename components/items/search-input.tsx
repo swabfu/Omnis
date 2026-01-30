@@ -7,18 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 import { BADGE_ICON_SIZE } from '@/lib/type-icons'
 import { SEARCH_RESULTS_LIMIT, SEARCH_DEBOUNCE_MS } from '@/lib/search-constants'
+import type { ItemWithTags, Tag } from '@/types/items'
 
 type Item = Database['public']['Tables']['items']['Row']
-
-interface Tag {
-  id: string
-  name: string
-  color: string
-}
-
-interface ItemWithTags extends Item {
-  tags: Tag[]
-}
 
 interface SearchInputProps {
   onResults: (items: ItemWithTags[]) => void
@@ -40,11 +31,7 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
           .from('items')
           .select(`
             *,
-            tags (
-              id,
-              name,
-              color
-            )
+            tags (*)
           `)
           .or(`title.ilike.%${sanitizedQuery}%,description.ilike.%${sanitizedQuery}%,content.ilike.%${sanitizedQuery}%,url.ilike.%${sanitizedQuery}%`)
           .order('created_at', { ascending: false })
@@ -66,11 +53,7 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
       .from('items')
       .select(`
         *,
-        tags (
-          id,
-          name,
-          color
-        )
+        tags (*)
       `)
       .order('created_at', { ascending: false })
 

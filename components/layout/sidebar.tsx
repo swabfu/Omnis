@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LogOut, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { deleteTagWithAssociations, dispatchTagsUpdated, TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
+import { deleteTagWithAssociations, bulkUpdateTagSortOrder } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -29,7 +29,8 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Database } from '@/types/database'
+import { useTags } from '@/lib/hooks/use-tags'
+import type { Tag } from '@/types/items'
 import {
   ACTION_ICON_SIZE,
   ACTION_ICON_STROKE_WIDTH,
@@ -41,12 +42,10 @@ import { SIDEBAR_TAGS_DISPLAY_LIMIT, SIDEBAR_WIDTH } from '@/lib/sidebar-constan
 import { SidebarTagItem } from './sidebar-tag-item'
 import { SidebarContentTypesNav, SidebarStatusNav } from './sidebar-nav-sections'
 
-type Tag = Database['public']['Tables']['tags']['Row']
-
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [tags, setTags] = useState<Tag[]>([])
+  const { tags, setTags, dispatchTagsUpdated } = useTags()
   const [tagManagerOpen, setTagManagerOpen] = useState(false)
   const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -59,31 +58,6 @@ export function Sidebar() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
-
-  const fetchTags = useCallback(async () => {
-    const { data } = await supabase
-      .from('tags')
-      .select('*')
-      .order('sort_order', { ascending: true })
-
-    if (data) {
-      setTags(data)
-    }
-  }, [supabase])
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid
-    fetchTags()
-
-    const handleTagsUpdated = () => {
-      fetchTags()
-    }
-
-    window.addEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
-    return () => {
-      window.removeEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
-    }
-  }, [fetchTags])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -146,17 +120,12 @@ export function Sidebar() {
     setTags(newTags)
 
     try {
+      // Single bulk update RPC call instead of N separate queries
       const updates = newTags.map((tag, index) => ({
         id: tag.id,
         sort_order: index,
       }))
-
-      for (const update of updates) {
-        await supabase
-          .from('tags')
-          .update({ sort_order: update.sort_order })
-          .eq('id', update.id)
-      }
+      await bulkUpdateTagSortOrder(updates, supabase)
     } catch {
       setTags(tags)
     }
@@ -257,8 +226,6 @@ export function Sidebar() {
       <TagManagerDialog
         open={tagManagerOpen}
         onOpenChange={setTagManagerOpen}
-        onTagCreated={fetchTags}
-        onTagDeleted={fetchTags}
       />
 
       {/* Delete Confirmation Dialog */}

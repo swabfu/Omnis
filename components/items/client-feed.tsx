@@ -9,7 +9,7 @@ import { dispatchTagsUpdated } from '@/lib/supabase/tags'
 import { useViewMode } from '@/lib/context/view-mode-context'
 import { useContext } from 'react'
 import { SearchContext } from '@/lib/context/search-context'
-import type { ItemWithTags } from './feed'
+import type { ItemWithTags } from '@/types/items'
 
 interface ClientFeedProps {
   initialType?: ContentType

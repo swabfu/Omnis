@@ -19,14 +19,9 @@ import { Database } from '@/types/database'
 import { TagSelector } from './tag-selector'
 import { BADGE_ICON_SIZE, NOTE_TYPE, IMAGE_TYPE } from '@/lib/type-icons'
 import { TITLE_TRUNCATE_LENGTH, TRUNCATE_ELLIPSIS } from '@/lib/truncate-constants'
+import type { Tag } from '@/types/items'
 
 type Item = Database['public']['Tables']['items']['Row']
-
-interface Tag {
-  id: string
-  name: string
-  color?: string
-}
 
 interface EditItemDialogProps {
   item: Item & { tags?: Tag[] }

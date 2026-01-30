@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { deleteTagWithAssociations, getNextSortOrder } from '@/lib/supabase/tags'
+import { deleteTagWithAssociations, getNextSortOrder, dispatchTagsUpdated } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -15,10 +15,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
-import { Plus, X, Tag, Loader2, Check } from 'lucide-react'
+import { Plus, X, Tag as TagIcon, Loader2, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/auth-provider'
-import { Database } from '@/types/database'
+import { useTags } from '@/lib/hooks/use-tags'
+import type { Tag } from '@/types/items'
 import {
   BADGE_ICON_SIZE,
   BADGE_ICON_STROKE_WIDTH,
@@ -31,8 +32,6 @@ import {
 import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR, TAG_BADGE_OPACITY, TAG_BORDER_OPACITY } from '@/lib/tag-colors'
 import { ICON_HIDE_OPACITY, HOVER_SHOW_OPACITY, OPACITY_TRANSITION } from '@/lib/opacity-constants'
 
-type Tag = Database['public']['Tables']['tags']['Row']
-
 interface TagManagerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -42,7 +41,7 @@ interface TagManagerDialogProps {
 
 export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDeleted }: TagManagerDialogProps) {
   const { user } = useAuth()
-  const [tags, setTags] = useState<Tag[]>([])
+  const { tags, setTags, fetchTags, dispatchTagsUpdated: triggerTagsUpdate } = useTags()
   const [newTagName, setNewTagName] = useState('')
   const [selectedColor, setSelectedColor] = useState(DEFAULT_TAG_COLOR)
   const [loading, setLoading] = useState(false)
@@ -50,20 +49,6 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null)
   const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
   const supabase = createClient()
-
-  const fetchTags = useCallback(async () => {
-    if (!user?.id) return
-
-    const { data } = await supabase
-      .from('tags')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('sort_order', { ascending: true })
-
-    if (data) {
-      setTags(data)
-    }
-  }, [supabase, user?.id])
 
   useEffect(() => {
     if (open) {
@@ -110,6 +95,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
         setTags([...tags, newTag])
         setNewTagName('')
         setSelectedColor(DEFAULT_TAG_COLOR)
+        triggerTagsUpdate()
         onTagCreated?.()
       }
         } catch {
@@ -135,6 +121,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
       setTags(tags.filter(t => t.id !== tagToDelete.id))
       setDeleteDialogOpen(false)
       setTagToDelete(null)
+      triggerTagsUpdate()
       onTagDeleted?.()
     } else {
       toast.error(error || 'Failed to delete tag. Please try again.')
@@ -165,7 +152,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
             {/* Create New Tag Section */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Tag className={cn(BADGE_ICON_SIZE, 'text-muted-foreground')} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
+                <TagIcon className={cn(BADGE_ICON_SIZE, 'text-muted-foreground')} strokeWidth={BADGE_ICON_STROKE_WIDTH} />
                 <span className="text-sm font-medium">Create New Tag</span>
               </div>
 
@@ -229,7 +216,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       border: `1px solid ${selectedColor}${TAG_BORDER_OPACITY}`,
                     }}
                   >
-                    <Tag className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
+                    <TagIcon className={ACTION_ICON_SIZE} strokeWidth={ACTION_ICON_STROKE_WIDTH} />
                     {newTagName}
                   </span>
                 </div>
@@ -268,7 +255,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
                       className="flex items-center justify-between group rounded-md border px-3 py-2 hover:bg-accent/50"
                     >
                       <div className="flex items-center gap-2">
-                        <Tag className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} style={{ color: tag.color }} />
+                        <TagIcon className={BADGE_ICON_SIZE} strokeWidth={BADGE_ICON_STROKE_WIDTH} style={{ color: tag.color }} />
                         <span className="text-sm">{tag.name}</span>
                       </div>
                       <Button

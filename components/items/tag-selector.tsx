@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getNextSortOrder, TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
+import { getNextSortOrder } from '@/lib/supabase/tags'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { X, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/auth-provider'
+import { useTags } from '@/lib/hooks/use-tags'
 import { cn } from '@/lib/utils'
 import {
   ACTION_ICON_SIZE,
@@ -20,12 +21,7 @@ import {
 } from '@/lib/type-icons'
 import { PRESET_TAG_COLORS, DEFAULT_TAG_COLOR, TAG_BADGE_OPACITY, TAG_BORDER_OPACITY, TAG_OUTLINE_BORDER_OPACITY } from '@/lib/tag-colors'
 import { TAG_SELECTOR_UNSELECTED_LIMIT } from '@/lib/sidebar-constants'
-
-interface Tag {
-  id: string
-  name: string
-  color?: string
-}
+import type { Tag } from '@/types/items'
 
 interface TagSelectorProps {
   selectedTags: Tag[]
@@ -35,40 +31,12 @@ interface TagSelectorProps {
 
 export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSelectorProps) {
   const { user } = useAuth()
-  const [allTags, setAllTags] = useState<Tag[]>([])
+  const { tags: allTags, setTags: setAllTags, dispatchTagsUpdated } = useTags()
   const [newTagName, setNewTagName] = useState('')
   const [selectedColor, setSelectedColor] = useState(DEFAULT_TAG_COLOR)
   const [showInput, setShowInput] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const supabase = createClient()
-
-  const fetchTags = useCallback(async () => {
-    if (!user?.id) return
-
-    const { data } = await supabase
-      .from('tags')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('sort_order', { ascending: true })
-
-    if (data) {
-      setAllTags(data)
-    }
-  }, [supabase, user])
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid effect usage
-    fetchTags()
-
-    const handleTagsUpdated = () => {
-      fetchTags()
-    }
-
-    window.addEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
-    return () => {
-      window.removeEventListener(TAGS_UPDATED_EVENT, handleTagsUpdated)
-    }
-  }, [fetchTags])
 
   const handleCreateTag = async () => {
     if (!newTagName.trim() || !user?.id) return
@@ -106,6 +74,7 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
       if (newTag) {
         setAllTags([...allTags, newTag])
         onTagsChange([...selectedTags, newTag])
+        dispatchTagsUpdated()
         onTagCreated?.()
       }
     }

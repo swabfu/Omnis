@@ -64,7 +64,10 @@ npm run lint     # Run ESLint
 | Interaction constants | `lib/interaction-constants.ts` |
 | Storage keys (localStorage) | `lib/storage-keys.ts` |
 | Supabase client (browser/server) | `lib/supabase/{client|server}.ts` |
+| Tag helpers (fetch, CRUD, bulk update) | `lib/supabase/tags.ts` |
+| Tag fetching hook | `lib/hooks/use-tags.ts` |
 | Database types | `types/database.ts` |
+| Item/Tag shared types | `types/items.ts` |
 | Utilities (cn, etc.) | `lib/utils.ts` |
 | Toast notifications | `components/ui/sonner.tsx` (import `toast`) |
 | Delete confirmation dialog | `components/ui/delete-confirm-dialog.tsx` |
@@ -171,10 +174,15 @@ app/
 
 ### Type Safety
 
-Database types auto-generated in `types/database.ts`. Use `Database` generic for type-safe queries:
+Database types auto-generated in `types/database.ts`. Shared domain types in `types/items.ts`:
 
 ```typescript
 import { Database } from '@/types/database'
+import type { Tag, ItemWithTags } from '@/types/items'
+```
+
+Use `Database` generic for type-safe queries:
+```typescript
 createServerClient<Database>(...)
 ```
 
@@ -191,7 +199,9 @@ createServerClient<Database>(...)
 
 **Components:** `components/layout/sidebar.tsx` (drag-drop reorder, inline edit, delete), `components/tags/tag-manager-dialog.tsx` (create with color picker), `components/items/tag-selector.tsx` (add to items), `components/items/item-card.tsx` (displays tags with colors).
 
-**Event bus:** `dispatchTagsUpdated()` triggers `omnis:tags-updated` custom event to sync changes.
+**Hooks:** `lib/hooks/use-tags.ts` - Shared hook for fetching/managing tags (use this instead of duplicating fetchTags logic).
+
+**Event bus:** `dispatchTagsUpdated()` triggers `omnis:tags-updated` custom event to sync changes across components.
 
 **Migrations:** New schema changes require manual migration in Supabase SQL Editor (files in `supabase/migrations/`).
 
