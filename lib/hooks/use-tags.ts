@@ -20,8 +20,8 @@ export function useTags() {
   const { user } = useAuth()
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- user?.id is correct for null check
   const fetchTags = useCallback(async () => {
     if (!user?.id) {
       setTags([])
@@ -29,6 +29,7 @@ export function useTags() {
       return
     }
 
+    const supabase = createClient()
     const { data } = await supabase
       .from('tags')
       .select('*')
@@ -39,7 +40,8 @@ export function useTags() {
       setTags(data)
     }
     setLoading(false)
-  }, [supabase, user?.id])
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- user?.id is correct for null check
+  }, [user?.id])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on mount is valid

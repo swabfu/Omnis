@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { Database } from '@/types/database'
+import { env } from '@/lib/env'
 
 // Public routes that don't require authentication
 const publicRoutes = ['/login', '/signup', '/reset-password', '/update-password', '/auth/callback']
@@ -11,8 +12,8 @@ export async function updateSession(request: NextRequest) {
   })
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.supabaseUrl,
+    env.supabaseAnonKey,
     {
       cookies: {
         getAll() {

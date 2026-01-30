@@ -1,0 +1,14 @@
+echo "🔍 Running lint..."
+npm run lint || {
+  echo "❌ Lint failed. Fix linting errors before committing."
+  exit 1
+}
+
+echo "🧪 Running tests..."
+npm run test -- --run || {
+  echo "❌ Tests failed. Fix test failures before committing."
+  echo "💡 Run 'npm run test:watch' to debug failing tests."
+  exit 1
+}
+
+echo "✅ Pre-commit checks passed!"

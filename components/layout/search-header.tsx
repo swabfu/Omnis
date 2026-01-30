@@ -1,7 +1,6 @@
 'use client'
 
 import { Header } from './header'
-import { useSearch } from '@/lib/context/search-context'
 import { useContext } from 'react'
 import { SearchContext } from '@/lib/context/search-context'
 

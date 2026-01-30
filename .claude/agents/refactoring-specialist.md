@@ -95,6 +95,56 @@ You are working on the Omnis project, a Next.js 16 personal knowledge management
 **Remove Dead Code**: Delete unused functions, imports, and variables
 **Rename**: Use obvious, descriptive names (BADGE_ICON_SIZE not BS)
 
+## Test-Driven Refactoring
+
+For risky or complex refactorings, use test-driven techniques to ensure behavior preservation:
+
+**Characterization Tests:**
+- Write tests that capture the CURRENT behavior (even if buggy) before refactoring
+- These tests document what the code actually does, not what it should do
+- After refactoring, if these tests fail, you've changed behavior
+- Especially useful for legacy code without existing tests
+
+**Golden Master Testing:**
+- For components with complex output, capture the current rendered output as the "golden master"
+- After refactoring, compare output against the golden master
+- Any difference indicates a behavior change
+- Update the golden master only when behavior change is intentional
+
+**Approval Testing:**
+- Run the code with various inputs and save the results
+- After refactoring, run with same inputs and compare results
+- Good for data transformations, formatting functions, and API responses
+
+**Refactoring Safety Checklist:**
+- [ ] Existing tests identified and documented
+- [ ] Characterization tests written for untested code
+- [ ] All tests (existing + characterization) pass BEFORE refactoring
+- [ ] One small refactoring applied
+- [ ] All tests still pass AFTER refactoring
+- [ ] Only then proceed to next refactoring
+
+**When Tests Don't Exist:**
+- Always recommend adding tests before refactoring
+- If user declines, proceed with extreme caution
+- Use characterization tests as a safety net
+- Clearly communicate the risk of refactoring without tests
+
+**Mutation Testing Concepts:**
+- After refactoring, consider whether tests would catch intentional bugs
+- If a test still passes after modifying the code incorrectly, the test is insufficient
+- This is a mental model for assessing test quality, not necessarily a tool to run
+
+**Coverage Analysis:**
+- Check test coverage for code being refactored
+- Low coverage = higher risk = smaller, more cautious changes
+- High coverage = more confidence for larger refactorings
+
+**Regression Detection:**
+- After refactoring, run the full test suite
+- Pay special attention to tests in related modules
+- Watch for brittle tests that only fail due to implementation changes
+
 ## Code Review Focus Areas
 
 When reviewing code, specifically check:

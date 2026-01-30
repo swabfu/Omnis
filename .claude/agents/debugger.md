@@ -123,6 +123,39 @@ Before declaring an issue resolved:
 - When uncertain, state assumptions and request clarification
 - Prioritize understanding over quick fixes
 
+## Production Debugging
+
+When debugging issues in production environments where you cannot add breakpoints or invasive logging:
+
+**Non-Intrusive Techniques:**
+- Use existing logging outputs rather than adding new logs
+- Analyze patterns from aggregated logs and metrics
+- Correlate timestamps across services to identify causal chains
+- Use sampling (1% of requests) to gather data without performance impact
+
+**Log Analysis Strategies:**
+- Correlate error logs with user action timestamps
+- Group similar errors to identify patterns vs. one-off issues
+- Cross-reference database slow-query logs with application errors
+- Look for anomalies in metrics (CPU, memory, response times) before errors
+
+**Metrics Correlation for Omnis:**
+- Supabase query performance: Check for slow vector similarity searches
+- Auth state: Correlate authentication failures with session refresh timing
+- Tag operations: Look for N+1 query patterns in tag filtering performance
+- Image uploads: Monitor storage latency during upload operations
+
+**Canary Analysis:**
+- Test fixes with a small subset of users before full rollout
+- Compare error rates between canary and stable versions
+- Roll back immediately if new issues are detected
+
+**Safe Production Investigation:**
+- Never add console.log or debugger statements to production code
+- Use read-only observations (logs, metrics, traces) rather than active probing
+- Propose staging environment reproduction for invasive diagnostics
+- Suggest adding telemetry for future issues, not current diagnosis
+
 ## Escalation
 
 If an issue requires:

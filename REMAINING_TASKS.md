@@ -1,19 +1,8 @@
 # Remaining Tasks
 
-## High Priority - Performance & DRY Violations
-
-### 1. Duplicated Color Picker UI
-**Files:** `tag-manager-dialog.tsx` lines 188-230, `tag-selector.tsx` lines 182-230
-
-**Issue:** Nearly identical color picker code in two places.
-
-**Fix:** Create `components/ui/tag-color-picker.tsx` as reusable component.
-
----
-
 ## Medium Priority
 
-### 2. Inconsistent Error Handling
+### 1. Inconsistent Error Handling
 **Files:** Multiple
 
 **Issue:** Error handling patterns vary (silent catches, toasts, console.error).
@@ -28,26 +17,25 @@ export function handleApiError(error: unknown, context: string) {
 
 ---
 
-### 3. Direct `useContext()` Instead of Custom Hook
-**File:** `components/layout/search-header.tsx` line 15
+## Completed
 
-**Issue:** Uses `useContext(SearchContext)` directly instead of `useSearch()`.
+### ~~Duplicated Color Picker UI~~
+**Created:** `components/ui/tag-color-picker.tsx`
 
-**Fix:** Replace with `useSearch()` for better error messages.
+Extracted duplicated color picker code into reusable component supporting both `dialog` and `popover` variants.
 
 ---
 
-### 4. Environment Variable Assumptions
-**File:** `lib/supabase/client.ts`
+### ~~Environment Variable Assumptions~~
+**Created:** `lib/env.ts`
 
-**Issue:** Uses `!` assertion, assumes env vars always exist.
+Replaced `!` assertions in `lib/supabase/client.ts`, `lib/supabase/server.ts`, and `lib/supabase/middleware.ts` with validated env config that provides clear error messages at startup.
 
-**Fix:** Add validation:
-```typescript
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-if (!url || !key) throw new Error('Missing Supabase environment variables')
-```
+---
+
+## Note
+
+Task 3 from original list ("Direct useContext() Instead of Custom Hook" in `search-header.tsx`) was **incorrectly identified**. The component intentionally uses `useContext(SearchContext)` with a null check because it's designed to work both with and without a SearchProvider. Using `useSearch()` would throw an error when no provider exists, breaking the intended behavior.
 
 ---
 

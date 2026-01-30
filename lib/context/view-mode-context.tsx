@@ -22,12 +22,13 @@ export function ViewModeProvider({ children }: { children: React.ReactNode }) {
   const transitionCallbacksRef = useRef<Set<(newView: ViewMode) => void>>(new Set())
 
   useEffect(() => {
-    setMounted(true)
     // Read from localStorage after mount (client-only)
     const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE)
     if (saved === 'list' || saved === 'masonry' || saved === 'uniform') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing localStorage to state on mount is valid
       setView(saved)
     }
+    setMounted(true)
   }, [])
 
   useEffect(() => {
@@ -37,31 +38,33 @@ export function ViewModeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [view, mounted])
 
-  // Register/unregister transition callbacks
-  const onTransitionRequest = (callback: (newView: ViewMode) => void) => {
-    transitionCallbacksRef.current.add(callback)
-    return () => {
-      transitionCallbacksRef.current.delete(callback)
-    }
-  }
-
-  // Enhanced setView that triggers transition callbacks immediately
-  const handleSetView = (newView: ViewMode) => {
-    if (newView === view) return
-
-    // Update state first
-    setView(newView)
-
-    // Immediately notify all transition listeners (synchronous)
-    transitionCallbacksRef.current.forEach(callback => callback(newView))
-  }
-
   // Memoize context value to prevent unnecessary re-renders
-  const value = useMemo(() => ({
-    view,
-    setView: handleSetView,
-    onTransitionRequest,
-  }), [view])
+  const value = useMemo(() => {
+    // Register/unregister transition callbacks
+    const onTransitionRequest = (callback: (newView: ViewMode) => void) => {
+      transitionCallbacksRef.current.add(callback)
+      return () => {
+        transitionCallbacksRef.current.delete(callback)
+      }
+    }
+
+    // Enhanced setView that triggers transition callbacks immediately
+    const setViewWithTransition = (newView: ViewMode) => {
+      if (newView === view) return
+
+      // Update state first
+      setView(newView)
+
+      // Immediately notify all transition listeners (synchronous)
+      transitionCallbacksRef.current.forEach(callback => callback(newView))
+    }
+
+    return {
+      view,
+      setView: setViewWithTransition,
+      onTransitionRequest,
+    }
+  }, [view])
 
   return (
     <ViewModeContext.Provider value={value}>

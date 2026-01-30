@@ -179,6 +179,7 @@ export function useTransitionState(
       setActualValue(initialValue)
       setDisplayValue(initialValue)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Syncing prop to local state
   }, [initialValue, actualValue, isTransitioning])
 
   /**

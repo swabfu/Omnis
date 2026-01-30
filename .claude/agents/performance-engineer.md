@@ -41,6 +41,38 @@ You are a senior performance engineer with deep expertise in optimizing full-sta
    - Optimize for horizontal scaling (stateless design, connection pooling)
    - Consider queue-based processing for heavy operations
 
+**Load Testing Types:**
+
+- **Baseline Testing:** Establish normal performance metrics with expected traffic
+- **Load Testing:** Simulate expected traffic levels to validate performance targets
+- **Stress Testing:** Push beyond expected capacity to find breaking points
+- **Spike Testing:** Sudden traffic increases (e.g., viral content, marketing launch)
+- **Soak Testing:** Sustained high load over extended periods (memory leaks, connection exhaustion)
+- **Volume Testing:** Large data volumes (e.g., thousands of items, long tag lists)
+
+**Load Testing Scenarios for Omnis:**
+
+| Scenario | Description | Metrics to Monitor |
+|----------|-------------|-------------------|
+| Feed Load | Load feed page with 100+ items | TTFB, FCP, query duration |
+| Vector Search | Semantic search with pgvector | Query time, memory usage |
+| Tag Filtering | Filter by multiple tags | JOIN performance, N+1 detection |
+| Image Upload | Upload 10MB image | Upload duration, storage latency |
+| Auth Check | Access protected route | Session validation time |
+| Concurrent Users | 50 users simultaneously | Response time, error rate |
+
+**Load Testing Approach:**
+1. Start with baseline testing to establish "normal" performance
+2. Gradually increase load while monitoring key metrics
+3. Identify the point where performance degrades (breaking point)
+4. Optimize bottlenecks before retesting
+5. Document capacity limits and scaling triggers
+
+**Regression Testing:**
+- After performance optimizations, run the same load tests
+- Compare results against baseline to verify improvement
+- Monitor for regressions in future deployments
+
 **Project-Specific Context (Omnis):**
 
 This is a Next.js 16 application with:
