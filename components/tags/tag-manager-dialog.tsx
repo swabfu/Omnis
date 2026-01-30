@@ -14,17 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
 import { Plus, X, Tag, Loader2, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/auth-provider'
 import { Database } from '@/types/database'
 import {
@@ -94,7 +86,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
         .single()
 
       if (existingTag) {
-        alert('A tag with this name already exists.')
+        toast.error('A tag with this name already exists.')
         setLoading(false)
         return
       }
@@ -121,7 +113,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
         onTagCreated?.()
       }
         } catch {
-      alert('Failed to create tag. Please try again.')
+      toast.error('Failed to create tag. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -145,7 +137,7 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
       setTagToDelete(null)
       onTagDeleted?.()
     } else {
-      alert(error || 'Failed to delete tag. Please try again.')
+      toast.error(error || 'Failed to delete tag. Please try again.')
     }
 
     setDeletingTagId(null)
@@ -308,24 +300,21 @@ export function TagManagerDialog({ open, onOpenChange, onTagCreated, onTagDelete
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Tag</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete <strong>&ldquo;{tagToDelete?.name}&rdquo;</strong>?
-              This will remove the tag from all items, but the items themselves will not be deleted.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              Delete Tag
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Tag"
+        description={
+          <>
+            Are you sure you want to delete <strong>&ldquo;{tagToDelete?.name}&rdquo;</strong>?
+            This will remove the tag from all items, but the items themselves will not be deleted.
+            This action cannot be undone.
+          </>
+        }
+        confirmText="Delete Tag"
+        isLoading={deletingTagId !== null}
+      />
     </>
   )
 }

@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { ContentType, ItemStatus } from '@/types/database'
 
+// Valid content types for validation
+const VALID_CONTENT_TYPES: ContentType[] = ['link', 'tweet', 'image', 'note']
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -12,23 +15,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { url, title, type = 'link' } = body
+    const { url, title, type } = body
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
-    // Determine content type from URL if not provided
-    let contentType: ContentType = type
-    if (!type) {
-      if (url.match(/(twitter|x)\.com/)) {
-        contentType = 'tweet'
-      } else if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-        contentType = 'image'
-      } else {
-        contentType = 'link'
-      }
-    }
+    // Validate and determine content type (default to 'link' if invalid)
+    const contentType: ContentType = VALID_CONTENT_TYPES.includes(type) ? type : 'link'
 
     // Insert item
     const { data: item, error } = await supabase
@@ -74,10 +68,12 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (type) {
+    // Validate type parameter before using it
+    if (type && VALID_CONTENT_TYPES.includes(type as ContentType)) {
       query = query.eq('type', type as ContentType)
     }
-    if (status) {
+    // Validate status parameter before using it
+    if (status && ['inbox', 'done', 'archived'].includes(status)) {
       query = query.eq('status', status as ItemStatus)
     }
 

@@ -32,6 +32,9 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
   useEffect(() => {
     const searchTimeout = setTimeout(async () => {
       if (query.trim()) {
+        // Escape LIKE special characters to prevent wildcard injection
+        const sanitizedQuery = query.replace(/%/g, '\\%').replace(/_/g, '\\_')
+
         // Search in title, description, content, and url
         const { data } = await supabase
           .from('items')
@@ -43,7 +46,7 @@ export function SearchInput({ onResults, onClear }: SearchInputProps) {
               color
             )
           `)
-          .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%,url.ilike.%${query}%`)
+          .or(`title.ilike.%${sanitizedQuery}%,description.ilike.%${sanitizedQuery}%,content.ilike.%${sanitizedQuery}%,url.ilike.%${sanitizedQuery}%`)
           .order('created_at', { ascending: false })
           .limit(SEARCH_RESULTS_LIMIT)
 

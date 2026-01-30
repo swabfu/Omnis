@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Tag as TagIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { createTagAssociations, dispatchTagsUpdated } from '@/lib/supabase/tags'
 import { Database } from '@/types/database'
@@ -116,7 +117,7 @@ export function EditItemDialog({ item, open, onOpenChange, onItemUpdated }: Edit
       onOpenChange(false)
       onItemUpdated()
         } catch {
-      alert('Failed to update item. Please try again.')
+      toast.error('Failed to update item. Please try again.')
     } finally {
       setLoading(false)
     }

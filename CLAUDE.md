@@ -62,9 +62,12 @@ npm run lint     # Run ESLint
 | Tag colors, opacity values | `lib/tag-colors.ts` |
 | UI constants (dialog, sidebar, etc.) | `lib/ui-constants.ts` |
 | Interaction constants | `lib/interaction-constants.ts` |
+| Storage keys (localStorage) | `lib/storage-keys.ts` |
 | Supabase client (browser/server) | `lib/supabase/{client|server}.ts` |
 | Database types | `types/database.ts` |
 | Utilities (cn, etc.) | `lib/utils.ts` |
+| Toast notifications | `components/ui/sonner.tsx` (import `toast`) |
+| Delete confirmation dialog | `components/ui/delete-confirm-dialog.tsx` |
 | Auth layout (Sidebar + Header) | `app/(auth)/layout.tsx` |
 | View mode context | `lib/context/view-mode-context.tsx` |
 | Search context | `lib/context/search-context.tsx` |

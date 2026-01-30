@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { ViewModeProvider } from '@/lib/context/view-mode-context'
+import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,6 +31,7 @@ export default function RootLayout({
             {children}
           </ViewModeProvider>
         </AuthProvider>
+        <Toaster />
         <script
           dangerouslySetInnerHTML={{
             __html: `

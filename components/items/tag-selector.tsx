@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { X, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/auth-provider'
 import { cn } from '@/lib/utils'
 import {
@@ -98,7 +99,7 @@ export function TagSelector({ selectedTags, onTagsChange, onTagCreated }: TagSel
         .single()
 
       if (insertError) {
-        alert('Failed to create tag. Please try again.')
+        toast.error('Failed to create tag. Please try again.')
         return
       }
 

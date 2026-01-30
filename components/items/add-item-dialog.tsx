@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Loader2, Tag as TagIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { createTagAssociations } from '@/lib/supabase/tags'
 import { fetchMetadata } from '@/lib/metadata'
@@ -130,7 +131,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       setOpen(false)
       onItemAdded?.()
         } catch {
-      alert('Failed to add item. Please try again.')
+      toast.error('Failed to add item. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -158,7 +159,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       setOpen(false)
       onItemAdded?.()
         } catch {
-      alert('Failed to add note. Please try again.')
+      toast.error('Failed to add note. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -171,14 +172,14 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
     // Validate file size (10MB limit matching bucket policy)
     const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
     if (imageFile.size > MAX_FILE_SIZE) {
-      alert('Image must be smaller than 10MB.')
+      toast.error('Image must be smaller than 10MB.')
       return
     }
 
     // Validate file type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
     if (!allowedTypes.includes(imageFile.type)) {
-      alert('Only PNG, JPEG, GIF, WebP, and SVG images are allowed.')
+      toast.error('Only PNG, JPEG, GIF, WebP, and SVG images are allowed.')
       return
     }
 
@@ -221,7 +222,7 @@ export function AddItemDialog({ onItemAdded, onTagCreated }: AddItemDialogProps)
       onItemAdded?.()
         } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to upload image. Please try again.'
-      alert(message)
+      toast.error(message)
       console.error('Image upload error:', err)
     } finally {
       setLoading(false)

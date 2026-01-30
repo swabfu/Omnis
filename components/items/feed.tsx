@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTransitionState } from '@/lib/hooks/use-transition-state'
+import { useViewMode } from '@/lib/context/view-mode-context'
 import { ContentType, ItemStatus, Database, ViewMode } from '@/types/database'
 import { ItemCard } from './item-card'
 import { MasonryGrid, MasonryItem } from './masonry-grid'
@@ -48,18 +49,22 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
   const currentView = view ?? 'masonry'
   const supabase = createClient()
   const filtersRef = useRef({ initialType, initialStatus, initialTagId, searchResults })
+  // Track pending requests synchronously to prevent race condition on rapid clicks
+  const isLoadingMoreRef = useRef(false)
 
   // Use global transition hook for view switching animations
   const { phase, displayValue: displayView, transitionTo } = useTransitionState(currentView)
 
-  // Handle view changes using the global hook
-  const prevViewRef = useRef(currentView)
+  // Get view mode context for immediate transition notifications
+  const { onTransitionRequest } = useViewMode()
+
+  // Register for immediate view change notifications (triggers synchronously when setView is called)
   useEffect(() => {
-    if (prevViewRef.current !== currentView) {
-      transitionTo(currentView)
-      prevViewRef.current = currentView
-    }
-  }, [currentView, transitionTo])
+    const unsubscribe = onTransitionRequest((newView) => {
+      transitionTo(newView)
+    })
+    return unsubscribe
+  }, [onTransitionRequest, transitionTo])
 
   // Get animation classes based on transition phase
   const getAnimationClasses = () => {
@@ -186,141 +191,124 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
   }, [initialType, initialStatus, initialTagId, searchResults])
 
   const handleLoadMore = async () => {
-    if (loadingMore || !hasMore) return
+    // Check both state and ref to prevent race conditions on rapid clicks
+    if (loadingMore || !hasMore || isLoadingMoreRef.current) return
+
+    isLoadingMoreRef.current = true
     setLoadingMore(true)
 
-    const nextPage = page + 1
-    const offset = page * PAGE_SIZE
+    try {
+      const nextPage = page + 1
+      const offset = page * PAGE_SIZE
 
-    // If filtering by tag, use item_tags junction table
-    if (initialTagId) {
-      const { data, error } = await supabase
-        .from('item_tags')
-        .select(`
-          items (
-            *,
-            tags (
-              id,
-              name,
-              color
+      // If filtering by tag, use item_tags junction table
+      if (initialTagId) {
+        const { data, error } = await supabase
+          .from('item_tags')
+          .select(`
+            items (
+              *,
+              tags (
+                id,
+                name,
+                color
+              )
             )
+          `)
+          .eq('tag_id', initialTagId)
+          .range(offset, offset + PAGE_SIZE - 1)
+
+        if (error) {
+          return  // Error - will be handled silently
+        }
+
+        if (data) {
+          const itemsData = data
+            .map((item_tag: { items: ItemWithTags | null }) => item_tag.items)
+            .filter((item): item is ItemWithTags => item !== null)
+
+          setItems(prev => [...prev, ...itemsData])
+          setHasMore(itemsData.length === PAGE_SIZE)
+          if (itemsData.length > 0) {
+            setPage(nextPage)
+          }
+        }
+        return
+      }
+
+      // Standard query with optional type/status filters
+      let query = supabase
+        .from('items')
+        .select(`
+          *,
+          tags (
+            id,
+            name,
+            color
           )
         `)
-        .eq('tag_id', initialTagId)
+        .order('created_at', { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1)
 
-      setLoadingMore(false)
+      if (initialType) {
+        query = query.eq('type', initialType)
+      }
+      if (initialStatus) {
+        query = query.eq('status', initialStatus)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         return  // Error - will be handled silently
       }
 
-      if (data) {
-        const itemsData = data
-          .map((item_tag: { items: ItemWithTags | null }) => item_tag.items)
-          .filter((item): item is ItemWithTags => item !== null)
-
-        setItems(prev => [...prev, ...itemsData])
-        setHasMore(itemsData.length === PAGE_SIZE)
-        if (itemsData.length > 0) {
-          setPage(nextPage)
-        }
+      const newItems = (data || []) as ItemWithTags[]
+      setItems(prev => [...prev, ...newItems])
+      setHasMore(newItems.length === PAGE_SIZE)
+      if (newItems.length > 0) {
+        setPage(nextPage)
       }
-      return
-    }
-
-    // Standard query with optional type/status filters
-    let query = supabase
-      .from('items')
-      .select(`
-        *,
-        tags (
-          id,
-          name,
-          color
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + PAGE_SIZE - 1)
-
-    if (initialType) {
-      query = query.eq('type', initialType)
-    }
-    if (initialStatus) {
-      query = query.eq('status', initialStatus)
-    }
-
-    const { data, error } = await query
-
-    setLoadingMore(false)
-
-    if (error) {
-      return  // Error - will be handled silently
-    }
-
-    const newItems = (data || []) as ItemWithTags[]
-    setItems(prev => [...prev, ...newItems])
-    setHasMore(newItems.length === PAGE_SIZE)
-    if (newItems.length > 0) {
-      setPage(nextPage)
+    } finally {
+      setLoadingMore(false)
+      isLoadingMoreRef.current = false
     }
   }
 
-  const handleStatusChange = async (id: string, status: ItemStatus) => {
+  const handleStatusChange = useCallback(async (id: string, status: ItemStatus) => {
     const { error } = await supabase
       .from('items')
       .update({ status })
       .eq('id', id)
 
     if (!error) {
-      setItems(items.map(item =>
+      setItems(prevItems => prevItems.map(item =>
         item.id === id ? { ...item, status } : item
       ))
     }
-  }
+  }, [supabase])
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     const { error } = await supabase
       .from('items')
       .delete()
       .eq('id', id)
 
     if (!error) {
-      setItems(items.filter(item => item.id !== id))
+      setItems(prevItems => prevItems.filter(item => item.id !== id))
     }
-  }
+  }, [supabase])
 
-  const handleItemUpdated = async () => {
+  const handleItemUpdated = useCallback(async () => {
     // Re-fetch items to get the updated data (reset pagination)
     setPage(1)
     setHasMore(true)
     await fetchItems(false)
-  }
+  }, [fetchItems])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className={`${LOADER_ICON_SIZE} animate-spin text-muted-foreground`} />
-      </div>
-    )
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className={cn('flex items-center justify-center rounded-full bg-muted', AVATAR_ICON_SIZE)}>
-          <span className="text-4xl">🧠</span>
-        </div>
-        <h2 className="mt-6 text-xl font-semibold">No items yet</h2>
-        <p className="mt-2 text-muted-foreground max-w-sm">
-          Start building your second brain by adding links, tweets, images, or notes.
-        </p>
-      </div>
-    )
-  }
-
-  // Render based on view mode
-  const viewContent = (
+  // Render based on view mode - memoized to prevent unnecessary re-renders
+  // Must be before early returns to maintain hooks order
+  const viewContent = useMemo(() => (
     <>
       {displayView === 'list' ? (
         <ListView>
@@ -359,7 +347,29 @@ export function Feed({ initialType, initialStatus, initialTagId, searchResults, 
         })()
       )}
     </>
-  )
+  ), [displayView, items, handleDelete, handleStatusChange, handleItemUpdated])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className={`${LOADER_ICON_SIZE} animate-spin text-muted-foreground`} />
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className={cn('flex items-center justify-center rounded-full bg-muted', AVATAR_ICON_SIZE)}>
+          <span className="text-4xl">🧠</span>
+        </div>
+        <h2 className="mt-6 text-xl font-semibold">No items yet</h2>
+        <p className="mt-2 text-muted-foreground max-w-sm">
+          Start building your second brain by adding links, tweets, images, or notes.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div

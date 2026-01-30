@@ -5,21 +5,13 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LogOut, Plus, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { deleteTagWithAssociations, dispatchTagsUpdated, TAGS_UPDATED_EVENT } from '@/lib/supabase/tags'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
 import { AddItemDialog } from '@/components/items/add-item-dialog'
 import { TagManagerDialog } from '@/components/tags/tag-manager-dialog'
 import {
@@ -105,7 +97,7 @@ export function Sidebar() {
       .eq('id', tagId)
 
     if (error) {
-      alert('Failed to update tag. Please try again.')
+      toast.error('Failed to update tag. Please try again.')
       return
     }
 
@@ -134,7 +126,7 @@ export function Sidebar() {
       setTagToDelete(null)
       dispatchTagsUpdated()
     } else {
-      alert(error || 'Failed to delete tag. Please try again.')
+      toast.error(error || 'Failed to delete tag. Please try again.')
     }
 
     setDeletingTagId(null)
@@ -270,24 +262,21 @@ export function Sidebar() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Tag</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete <strong>&ldquo;{tagToDelete?.name}&rdquo;</strong>?
-              This will remove the tag from all items, but the items themselves will not be deleted.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              Delete Tag
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Tag"
+        description={
+          <>
+            Are you sure you want to delete <strong>&ldquo;{tagToDelete?.name}&rdquo;</strong>?
+            This will remove the tag from all items, but the items themselves will not be deleted.
+            This action cannot be undone.
+          </>
+        }
+        confirmText="Delete Tag"
+        isLoading={deletingTagId !== null}
+      />
     </div>
   )
 }

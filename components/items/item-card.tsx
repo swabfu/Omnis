@@ -1,17 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { ContentType, ItemStatus, Database } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
 import { EditItemDialog } from './edit-item-dialog'
 import { ItemCardActions } from './item-card-actions'
 import { ItemCardContent } from './item-card-content'
 import { ItemCardLabels } from './item-card-labels'
-import { TITLE_LINE_CLAMP, TEXT_MUTED } from '@/lib/text-style-constants'
+import { TITLE_LINE_CLAMP } from '@/lib/text-style-constants'
 import { LINK_TYPE } from '@/lib/type-icons'
 
 type Item = Database['public']['Tables']['items']['Row']
@@ -43,7 +43,7 @@ interface ItemCardProps {
   variant?: 'card' | 'list'
 }
 
-export function ItemCard({
+function ItemCardInner({
   id,
   type,
   url,
@@ -59,8 +59,8 @@ export function ItemCard({
   onItemUpdated,
   variant = 'card',
 }: ItemCardProps) {
-  const supabase = createClient()
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const item: ItemWithTags = {
     id,
@@ -82,9 +82,11 @@ export function ItemCard({
   }
 
   const handleDelete = () => {
-    if (confirm('Delete this item?')) {
-      onDelete?.(id)
-    }
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    onDelete?.(id)
   }
 
   const isList = variant === 'list'
@@ -147,6 +149,14 @@ export function ItemCard({
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
           onItemUpdated={onItemUpdated || (() => {})}
+        />
+        <DeleteConfirmDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Item"
+          description="Are you sure you want to delete this item? This action cannot be undone."
+          confirmText="Delete"
         />
       </>
     )
@@ -211,6 +221,25 @@ export function ItemCard({
         onOpenChange={setEditDialogOpen}
         onItemUpdated={onItemUpdated || (() => {})}
       />
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+      />
     </>
   )
 }
+
+export const ItemCard = memo(ItemCardInner, (prevProps, nextProps) => {
+  // Only re-render if these key props change
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.status === nextProps.status &&
+    prevProps.tags === nextProps.tags &&
+    prevProps.variant === nextProps.variant
+  )
+})
+
