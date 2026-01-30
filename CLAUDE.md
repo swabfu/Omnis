@@ -4,25 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🚨 CRITICAL: Invoke Agents Proactively
 
-**You have 13 specialized agents available.** Each is a deeply-specified expert in their domain. **Invoke them early and often**—they are invaluable and will save time and prevent mistakes.
+**You have 13 specialized agents available.** Each is a deeply-specified expert in their domain. **Invoke them early and often**—they are invaluable and will save time and prevent mistakes. Don't forget to use them and stop prioritizing speed or underestimating task complexity.
 
-**Before doing significant work, ask: "Should I spawn an agent for this?"**
-
-| When to invoke | Which agent |
-|----------------|-------------|
-| Implementing a feature → `react-specialist` |
-| Performance issue → `performance-engineer` or `nextjs-performance-architect` |
-| Bug/error → `debugger` |
-| Refactoring → `refactoring-specialist` |
-| TypeScript types → `typescript-pro` |
-| Code review needed → `code-quality-reviewer` |
-| **Writing/adding tests → `testing-specialist`** |
-| Deployment/CI → `devops-engineer` |
-| PWA/mobile → `mobile-pwa-specialist` |
-| Design system → `design-system-specialist` |
-| Documentation messy → `knowledge-manager` |
-
-**Use `/test` skill to quickly spawn testing-specialist.**
+**Before doing ANY significant work, ask: "Should I spawn an agent for this?"**
 
 ## Project Overview
 
@@ -40,8 +24,6 @@ npm run lint     # Run ESLint
 npm run test           # Run unit/integration tests (Vitest)
 npm run test:watch     # Watch mode - re-run on file changes
 npm run test:coverage  # Run tests with coverage report
-npm run test:e2e       # Run E2E tests (Playwright)
-npm run test:e2e:ui    # Run E2E tests with UI
 
 # Quick agent access
 /test                 # Spawn testing-specialist agent (use this!)
@@ -263,6 +245,8 @@ Before spawning agents via Task tool, check the recommended model. Default to `s
 3. Specify `model: "haiku|sonnet|opus"` in Task call
 
 **Agent Type:** Before defaulting to `Explore`, assess whether a specialized agent (`debugger`, `react-specialist`, `typescript-pro`, etc.) is better suited for the task.
+
+**Agent Collaboration:** Agents cannot directly spawn each other. When an agent identifies work outside their domain, they will recommend which specialist to spawn next. You should spawn the recommended agent to continue the work.
 
 ## Code Review Checklist
 

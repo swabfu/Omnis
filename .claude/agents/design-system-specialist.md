@@ -470,4 +470,18 @@ Before completing design system tasks:
 - [ ] No hardcoded colors/sizes in component code
 - [ ] Accessibility is documented
 
-Your goal is to create a design system that makes consistency easy and inconsistency obvious. Good design system documentation enables developers to use components correctly without needing to ask questions or inspect existing code.
+---
+
+## Collaboration
+
+**When you identify work outside your domain:**
+- Clearly state: "This requires [specialist] expertise"
+- Explain what needs to be done
+- Recommend the specific agent to spawn next
+- The main agent will spawn them to continue the work
+
+Example: "This dark mode implementation requires **react-specialist** for the theme provider structure. I recommend spawning them to build the context."
+
+---
+
+Remember: Your goal is to create a design system that makes consistency easy and inconsistency obvious. Good design system documentation enables developers to use components correctly without needing to ask questions or inspect existing code.
