@@ -47,7 +47,8 @@ export const mockSupabaseClient = {
         })),
         order: vi.fn(() => Promise.resolve({ data, error: null })),
       })),
-      insert: vi.fn((item: unknown) => Promise.resolve({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test mock needs flexibility
+      insert: vi.fn((item: any) => Promise.resolve({
         data: { ...item, id: 'new-id', created_at: new Date().toISOString() },
         error: null,
       })),
