@@ -4,6 +4,12 @@ npm run lint || {
   exit 1
 }
 
+echo "🔎 Running type check..."
+npx tsc --noEmit || {
+  echo "❌ Type check failed. Fix TypeScript errors before committing."
+  exit 1
+}
+
 echo "🧪 Running tests..."
 npm run test -- --run || {
   echo "❌ Tests failed. Fix test failures before committing."
